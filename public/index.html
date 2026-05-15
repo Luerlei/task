@@ -131,6 +131,17 @@
     .list-table tr:hover td{background:var(--bg-secondary)}
     .list-table .td-title{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .list-table .td-desc{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)}
+    .list-toolbar{display:flex;align-items:center;justify-content:flex-end;padding:0 0 10px 0}
+    .card-toolbar{display:flex;align-items:center;justify-content:flex-end;padding:0 12px 10px 0}
+    .list-col-picker{position:absolute;top:100%;right:0;margin-top:4px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:8px 12px;z-index:50;box-shadow:var(--card-shadow);min-width:140px;max-height:320px;overflow-y:auto}
+    .list-col-opt{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 0;cursor:pointer;white-space:nowrap}
+    .list-col-opt input{margin:0}
+    .tc-meta{display:flex;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--text-secondary);padding:2px 0}
+
+    .gantt-save-bar{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--warning);color:#fff;border-radius:6px;font-size:12px;font-weight:500;animation:slideIn 0.3s ease}
+    .gantt-save-bar button{padding:4px 12px;border-radius:4px;border:none;font-size:12px;font-weight:500;cursor:pointer}
+    .gantt-save-bar .save-btn{background:#fff;color:var(--warning)}
+    .gantt-save-bar .discard-btn{background:rgba(255,255,255,0.3);color:#fff}
 
     .fab{position:fixed;bottom:28px;right:28px;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(0,122,255,0.4);transition:transform 0.2s;z-index:100}
     .fab:hover{transform:scale(1.1)}
@@ -205,14 +216,24 @@
     .gantt-scale-btn.active{background:var(--accent);color:#fff}
     .gantt-nav-btn{padding:5px 10px;font-size:12px;cursor:pointer;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-secondary)}
     .gantt-nav-btn:hover{background:var(--bg-tertiary)}
+    .gantt-col-picker{position:absolute;top:100%;right:0;margin-top:4px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:8px 12px;z-index:50;box-shadow:var(--card-shadow);min-width:160px;max-height:320px;overflow-y:auto}
+    .gantt-col-opt{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 0;cursor:grab;white-space:nowrap;border-bottom:1px solid var(--border-color)}
+    .gantt-col-opt:last-child{border-bottom:none}
+    .gantt-col-opt input{margin:0}
+    .gantt-col-opt .col-drag-handle{color:var(--text-tertiary);font-size:11px;cursor:grab;margin-right:2px}
+    .gantt-col-opt.sortable-ghost{opacity:0.4}
     .gantt-body{flex:1;display:flex;overflow:hidden;border:1px solid var(--border-color);border-radius:var(--radius);background:var(--card-bg)}
-    .gantt-left{width:220px;min-width:220px;border-right:1px solid var(--border-color);overflow-y:auto;flex-shrink:0}
-    .gantt-left-header{padding:8px 12px;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:1px solid var(--border-color);height:36px;display:flex;align-items:center}
+    .gantt-left{border-right:1px solid var(--border-color);overflow-y:auto;flex-shrink:0}
+    .gantt-left-header{padding:0 12px;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);border-bottom:1px solid var(--border-color);height:36px;display:flex;align-items:center;gap:4px}
+    .gantt-expand-check{display:flex;align-items:center;flex-shrink:0;cursor:pointer}
+    .gantt-expand-check input{margin:0;cursor:pointer}
+    .gantt-lh-cell{font-size:10px;font-weight:600;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px;flex-shrink:0}
+    .gantt-lr-cell{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px;flex-shrink:0}
     .gantt-cat-row{padding:6px 12px;font-size:12px;font-weight:600;background:var(--bg-secondary);cursor:pointer;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border-color);height:32px;user-select:none}
     .gantt-cat-row:hover{background:var(--bg-tertiary)}
     .gantt-cat-toggle{font-size:10px;transition:transform 0.2s}
     .gantt-cat-toggle.collapsed{transform:rotate(-90deg)}
-    .gantt-task-row{padding:4px 12px 4px 28px;font-size:12px;height:32px;display:flex;align-items:center;border-bottom:1px solid var(--border-color);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer}
+    .gantt-task-row{padding:4px 12px;font-size:12px;height:32px;display:flex;align-items:center;border-bottom:1px solid var(--border-color);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;gap:0}
     .gantt-task-row:hover{background:var(--bg-secondary)}
     .gantt-right{flex:1;overflow-x:auto;overflow-y:auto;position:relative}
     .gantt-timeline-header{display:flex;height:36px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:2;min-width:fit-content}
@@ -222,15 +243,21 @@
     .gantt-row-bg{height:32px;border-bottom:1px solid var(--border-color);display:flex}
     .gantt-cell{border-right:1px solid var(--border-color);flex-shrink:0;height:100%}
     .gantt-cell.today{background:rgba(255,59,48,0.04)}
-    .gantt-cell.weekend{background:rgba(0,0,0,0.02)}
-    [data-theme="dark"] .gantt-cell.weekend{background:rgba(255,255,255,0.02)}
+    .gantt-cell.weekend{background:rgba(0,0,0,0.05)}
+    [data-theme="dark"] .gantt-cell.weekend{background:rgba(255,255,255,0.05)}
+    .gantt-th.weekend{background:rgba(0,0,0,0.04);color:var(--text-tertiary)}
+    [data-theme="dark"] .gantt-th.weekend{background:rgba(255,255,255,0.04)}
     .gantt-bar-layer{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
-    .gantt-bar{position:absolute;height:20px;border-radius:4px;cursor:pointer;pointer-events:all;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:500;color:#fff;overflow:hidden;white-space:nowrap;transition:box-shadow 0.2s;user-select:none}
+    .gantt-bar{position:absolute;height:20px;border-radius:4px;cursor:grab;pointer-events:all;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:500;color:#fff;overflow:hidden;white-space:nowrap;user-select:none;gap:4px}
     .gantt-bar:hover{box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:5}
+    .gantt-bar.dragging{cursor:grabbing;opacity:0.85;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:none}
     .gantt-bar-handle{position:absolute;top:0;width:6px;height:100%;cursor:col-resize;z-index:3}
     .gantt-bar-handle.left{left:0;border-radius:4px 0 0 4px}
     .gantt-bar-handle.right{right:0;border-radius:0 4px 4px 0}
     .gantt-bar-handle:hover{background:rgba(255,255,255,0.3)}
+    .gantt-bar-priority{font-size:9px;padding:1px 3px;border-radius:2px;flex-shrink:0}
+    .gantt-bar-title{flex:1;overflow:hidden;text-overflow:ellipsis}
+    .gantt-bar-pts{font-size:9px;opacity:0.85;flex-shrink:0}
     .gantt-today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--danger);z-index:4;pointer-events:none}
   </style>
 </head>
@@ -330,7 +357,17 @@
       </div>
 
       <!-- Board: Card View -->
-      <div v-if="currentView==='board'&&viewMode==='card'" class="board-page">
+      <div v-if="currentView==='board'&&viewMode==='card'" class="board-page" @click="showCardFieldPicker=false">
+        <div class="card-toolbar">
+          <div style="position:relative" @click.stop>
+            <button class="gantt-nav-btn" @click="showCardFieldPicker=!showCardFieldPicker">⚙ 字段设置</button>
+            <div v-if="showCardFieldPicker" class="list-col-picker">
+              <div v-for="f in cardAllFields" :key="f.key" class="list-col-opt">
+                <input type="checkbox" :value="f.key" v-model="cardVisibleFields"> {{f.label}}
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="board-container" :class="{vertical:orientation==='v'}">
           <div class="lane" v-for="lane in sortedLanes" :key="lane.id">
             <div class="lane-header">
@@ -340,13 +377,19 @@
             <div class="lane-body" :data-lane-id="lane.id">
               <div class="task-card" v-for="task in getTasksInLane(lane.id)" :key="task.id" :data-task-id="task.id" :class="{'is-overdue':isOverdue(task.deadline)}" :style="{'border-left-color':priorityColor(task.priority)}" @click="openTaskDetail(task)">
                 <div class="tc-header">
-                  <div class="tc-header-left"><span class="ptag" :style="{background:priorityColor(task.priority)+'20',color:priorityColor(task.priority)}">{{priorityLabel(task.priority)}}</span><span class="tc-title">{{task.title}}</span><span class="overdue-badge">⏰过期</span></div>
-                  <span class="tc-pts" v-if="task.rewardPoints">💰{{task.rewardPoints}}</span>
+                  <div class="tc-header-left"><span v-if="isCardFieldVisible('priority')" class="ptag" :style="{background:priorityColor(task.priority)+'20',color:priorityColor(task.priority)}">{{priorityLabel(task.priority)}}</span><span v-if="isCardFieldVisible('title')" class="tc-title">{{task.title}}</span><span class="overdue-badge">⏰过期</span></div>
+                  <span class="tc-pts" v-if="isCardFieldVisible('rewardPoints')&&task.rewardPoints">💰{{task.rewardPoints}}</span>
                 </div>
-                <div class="tc-desc" v-if="task.description">{{task.description}}</div>
+                <div class="tc-desc" v-if="isCardFieldVisible('description')&&task.description">{{task.description}}</div>
+                <div class="tc-meta" v-if="isCardFieldVisible('category')||isCardFieldVisible('creator')||isCardFieldVisible('startDate')||isCardFieldVisible('endDate')">
+                  <span v-if="isCardFieldVisible('category')&&task.category" class="tc-cat">{{categories.find(c=>c.id===task.category)?.name}}</span>
+                  <span v-if="isCardFieldVisible('creator')&&task.creatorName" class="tc-creator">{{task.creatorName}}</span>
+                  <span v-if="isCardFieldVisible('startDate')&&task.startDate" class="tc-date">始:{{formatDate(task.startDate)}}</span>
+                  <span v-if="isCardFieldVisible('endDate')&&task.endDate" class="tc-date">终:{{formatDate(task.endDate)}}</span>
+                </div>
                 <div class="tc-footer">
-                  <span class="tc-deadline" :class="{overdue:isOverdue(task.deadline)}">{{formatDate(task.deadline)}}</span>
-                  <div class="tc-assignees" v-if="task.assigneeUsers?.length"><div class="tc-avatar" v-for="a in task.assigneeUsers" :key="a.id" :title="a.displayName">{{a.displayName?.charAt(0)}}</div></div>
+                  <span v-if="isCardFieldVisible('deadline')" class="tc-deadline" :class="{overdue:isOverdue(task.deadline)}">{{formatDate(task.deadline)}}</span>
+                  <div class="tc-assignees" v-if="isCardFieldVisible('assignees')&&task.assigneeUsers?.length"><div class="tc-avatar" v-for="a in task.assigneeUsers" :key="a.id" :title="a.displayName">{{a.displayName?.charAt(0)}}</div></div>
                 </div>
               </div>
               <div v-if="getTasksInLane(lane.id).length===0" class="empty-state"><p>暂无任务</p></div>
@@ -356,27 +399,34 @@
       </div>
 
       <!-- Board: List View -->
-      <div v-if="currentView==='board'&&viewMode==='list'" class="list-view">
+      <div v-if="currentView==='board'&&viewMode==='list'" class="list-view" @click="showListColPicker=false">
+        <div class="list-toolbar">
+          <div style="position:relative" @click.stop>
+            <button class="gantt-nav-btn" @click="showListColPicker=!showListColPicker">⚙ 列设置</button>
+            <div v-if="showListColPicker" class="list-col-picker" ref="listColPickerEl">
+              <div v-for="col in listColOrder" :key="col.key" class="list-col-opt" :data-col-key="col.key">
+                <span class="col-drag-handle">⋮⋮</span>
+                <input type="checkbox" :value="col.key" v-model="listVisibleCols"> {{col.label}}
+              </div>
+            </div>
+          </div>
+        </div>
         <table class="list-table">
-          <thead><tr><th>泳道</th><th>优先级</th><th>标题</th><th>描述</th><th>分值</th><th>截止日期</th><th>认领者</th><th>创建者</th><th>创建时间</th></tr></thead>
+          <thead><tr><th v-for="col in listActiveFields" :key="col.key">{{col.label}}</th></tr></thead>
           <tbody>
             <tr v-for="task in allVisibleTasks" :key="task.id" @click="openTaskDetail(task)" style="cursor:pointer">
-              <td><span class="lane-dot" :style="{background:getLaneColor(task.laneId),display:'inline-block',marginRight:'6px'}"></span>{{getLaneName(task.laneId)}}</td>
-              <td><span class="ptag" :style="{background:priorityColor(task.priority)+'20',color:priorityColor(task.priority)}">{{priorityLabel(task.priority)}}</span></td>
-              <td class="td-title">{{task.title}}</td>
-              <td class="td-desc">{{task.description||'-'}}</td>
-              <td style="color:var(--warning);font-weight:600">{{task.rewardPoints||0}}</td>
-              <td :style="{color:isOverdue(task.deadline)?'var(--danger)':''}">{{formatDate(task.deadline)||'-'}}</td>
-              <td>{{task.assigneeUsers?.map(a=>a.displayName).join(', ')||'-'}}</td>
-              <td>{{task.creatorName}}</td>
-              <td>{{formatDate(task.createdAt)}}</td>
+              <td v-for="col in listActiveFields" :key="col.key" :class="col.tdClass||''" :style="col.key==='deadline'&&isOverdue(task.deadline)?{color:'var(--danger)'}:col.key==='rewardPoints'?{color:'var(--warning)',fontWeight:'600'}:{}">
+                <template v-if="col.key==='lane'"><span class="lane-dot" :style="{background:getLaneColor(task.laneId),display:'inline-block',marginRight:'6px'}"></span>{{getLaneName(task.laneId)}}</template>
+                <template v-else-if="col.key==='priority'"><span class="ptag" :style="{background:priorityColor(task.priority)+'20',color:priorityColor(task.priority)}">{{priorityLabel(task.priority)}}</span></template>
+                <template v-else>{{listFieldValue(task,col.key)}}</template>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <!-- Board: Gantt View -->
-      <div v-if="currentView==='board'&&viewMode==='gantt'" class="gantt-container">
+      <div v-if="currentView==='board'&&viewMode==='gantt'" class="gantt-container" @click="showGanttColPicker=false">
         <div class="gantt-toolbar">
           <div class="gantt-scale-btns">
             <button class="gantt-scale-btn" :class="{active:ganttScale==='day'}" @click="ganttScale='day'">日</button>
@@ -386,23 +436,42 @@
           <button class="gantt-nav-btn" @click="ganttNavPrev">←</button>
           <button class="gantt-nav-btn" @click="ganttNavToday">今天</button>
           <button class="gantt-nav-btn" @click="ganttNavNext">→</button>
+          <div v-if="ganttPendingChanges.length" class="gantt-save-bar">
+            <span>{{ganttPendingChanges.length}}项修改未保存</span>
+            <button class="save-btn" @click="ganttSaveChanges">保存</button>
+            <button class="discard-btn" @click="ganttDiscardChanges">放弃</button>
+          </div>
+          <div style="margin-left:auto;position:relative" @click.stop>
+            <button class="gantt-nav-btn" @click="showGanttColPicker=!showGanttColPicker">⚙ 列设置</button>
+            <div v-if="showGanttColPicker" class="gantt-col-picker" ref="ganttColPickerEl">
+              <div v-for="col in ganttColOrder" :key="col.key" class="gantt-col-opt" :data-col-key="col.key">
+                <span class="col-drag-handle">⋮⋮</span>
+                <input type="checkbox" :value="col.key" v-model="ganttLeftCols"> {{col.label}}
+              </div>
+            </div>
+          </div>
         </div>
         <div class="gantt-body">
-          <div class="gantt-left">
-            <div class="gantt-left-header">任务 / 分类</div>
+          <div class="gantt-left" :style="{width:ganttLeftWidth+'px',minWidth:ganttLeftWidth+'px'}">
+            <div class="gantt-left-header">
+              <label class="gantt-expand-check" title="全部展开/折叠"><input type="checkbox" :checked="ganttAllExpanded" @change="toggleGanttExpandAll($event.target.checked)"></label>
+              <span v-for="f in ganttVisibleFields" :key="f.key" class="gantt-lh-cell" :style="{width:f.width+'px'}">{{f.label}}</span>
+            </div>
             <template v-for="cat in ganttCategories" :key="cat.id">
               <div class="gantt-cat-row" @click="toggleGanttCat(cat.id)">
                 <span class="gantt-cat-toggle" :class="{collapsed:ganttCollapsed[cat.id]}">▼</span>
                 <span :style="{color:cat.color}">●</span> {{cat.name}} ({{ganttTasksByCat(cat.id).length}})
               </div>
               <template v-if="!ganttCollapsed[cat.id]">
-                <div class="gantt-task-row" v-for="task in ganttTasksByCat(cat.id)" :key="task.id" @click="openTaskDetail(task)">{{task.title}}</div>
+                <div class="gantt-task-row" v-for="task in ganttTasksByCat(cat.id)" :key="task.id" @dblclick="openTaskDetail(task)">
+                  <span v-for="f in ganttVisibleFields" :key="f.key" class="gantt-lr-cell" :style="{width:f.width+'px'}" :title="ganttFieldValue(task,f.key)">{{ganttFieldValue(task,f.key)}}</span>
+                </div>
               </template>
             </template>
           </div>
           <div class="gantt-right" ref="ganttRight" @scroll="syncGanttScroll">
             <div class="gantt-timeline-header">
-              <div class="gantt-th" v-for="col in ganttCols" :key="col.key" :class="{today:col.isToday}" :style="{width:ganttColWidth+'px'}">{{col.label}}</div>
+              <div class="gantt-th" v-for="col in ganttCols" :key="col.key" :class="{today:col.isToday,weekend:col.isWeekend}" :style="{width:ganttColWidth+'px'}">{{col.label}}</div>
             </div>
             <div class="gantt-rows" :style="{height:ganttRowsHeight+'px'}">
               <template v-for="cat in ganttCategories" :key="'bg-'+cat.id">
@@ -417,9 +486,11 @@
               </template>
               <div class="gantt-bar-layer">
                 <template v-for="bar in ganttBars" :key="bar.task.id">
-                  <div class="gantt-bar" :style="{left:bar.left+'px',top:bar.top+'px',width:bar.width+'px',background:bar.color}" @click.stop="openTaskDetail(bar.task)" @mousedown.stop="startGanttDrag($event,bar,'move')">
+                  <div class="gantt-bar" :style="{left:bar.left+'px',top:bar.top+'px',width:bar.width+'px',background:bar.color}" :data-task-id="bar.task.id" @dblclick.stop="openTaskDetail(bar.task)" @mousedown.stop="startGanttDrag($event,bar,'move')">
                     <div class="gantt-bar-handle left" @mousedown.stop="startGanttDrag($event,bar,'left')"></div>
-                    <span>{{bar.task.title}}</span>
+                    <span class="gantt-bar-priority" :style="{background:'rgba(255,255,255,0.3)'}">{{priorityLabel(bar.task.priority)}}</span>
+                    <span class="gantt-bar-title">{{bar.task.title}}</span>
+                    <span v-if="bar.task.rewardPoints" class="gantt-bar-pts">{{bar.task.rewardPoints}}</span>
                     <div class="gantt-bar-handle right" @mousedown.stop="startGanttDrag($event,bar,'right')"></div>
                   </div>
                 </template>
@@ -434,13 +505,11 @@
       <div v-if="currentView==='settings'" class="settings-container">
         <div class="settings-tabs">
           <div class="settings-tab" :class="{active:settingsTab==='users'}" @click="settingsTab='users'">用户管理</div>
-          <div class="settings-tab" :class="{active:settingsTab==='groups'}" @click="settingsTab='groups'">分组管理</div>
           <div class="settings-tab" :class="{active:settingsTab==='lanes'}" @click="settingsTab='lanes'">泳道设置</div>
-          <div class="settings-tab" :class="{active:settingsTab==='categories'}" @click="settingsTab='categories'">分类管理</div>
-          <div class="settings-tab" :class="{active:settingsTab==='priorities'}" @click="settingsTab='priorities'">优先级管理</div>
-          <div class="settings-tab" :class="{active:settingsTab==='system'}" @click="settingsTab='system'">功能开关</div>
+          <div class="settings-tab" :class="{active:settingsTab==='dict'}" @click="settingsTab='dict'">字典设置</div>
+          <div class="settings-tab" :class="{active:settingsTab==='system'}" @click="settingsTab='system'">功能设定</div>
         </div>
-        <!-- Users -->
+        <!-- Users (merged with Groups) -->
         <div v-if="settingsTab==='users'">
           <div class="mgmt-header"><h3>用户列表</h3><button class="btn btn-primary btn-sm" @click="openUserForm()">+ 添加用户</button></div>
           <table class="data-table">
@@ -454,10 +523,8 @@
               </tr>
             </tbody>
           </table>
-        </div>
-        <!-- Groups -->
-        <div v-if="settingsTab==='groups'">
-          <div class="mgmt-header"><h3>分组列表</h3><button class="btn btn-primary btn-sm" @click="openGroupForm()">+ 添加分组</button></div>
+          <h3 style="font-size:15px;font-weight:600;margin:24px 0 12px">分组管理</h3>
+          <div class="mgmt-header"><span></span><button class="btn btn-primary btn-sm" @click="openGroupForm()">+ 添加分组</button></div>
           <div v-for="g in groups" :key="g.id" class="lane-list-item"><span>{{g.name}}</span><div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" @click="openGroupForm(g)">编辑</button><button class="btn btn-danger btn-sm" @click="deleteGroup(g)">删除</button></div></div>
           <div v-if="groups.length===0" class="empty-state"><p>暂无分组</p></div>
         </div>
@@ -469,18 +536,17 @@
             <div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" @click="openLaneForm(lane)">编辑</button><button class="btn btn-danger btn-sm" @click="deleteLane(lane)">删除</button></div>
           </div>
         </div>
-        <!-- Categories -->
-        <div v-if="settingsTab==='categories'">
-          <div class="mgmt-header"><h3>任务分类</h3><button class="btn btn-primary btn-sm" @click="openCategoryForm()">+ 添加分类</button></div>
+        <!-- Dict (Categories + Priorities) -->
+        <div v-if="settingsTab==='dict'">
+          <h3 style="font-size:15px;font-weight:600;margin-bottom:12px">任务分类</h3>
+          <div class="mgmt-header"><span></span><button class="btn btn-primary btn-sm" @click="openCategoryForm()">+ 添加分类</button></div>
           <div v-for="cat in categories" :key="cat.id" class="lane-list-item">
             <div class="lane-list-item-left"><span class="lane-dot" :style="{background:cat.color}"></span><span>{{cat.name}}</span></div>
             <div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" @click="openCategoryForm(cat)">编辑</button><button class="btn btn-danger btn-sm" @click="deleteCategory(cat)">删除</button></div>
           </div>
           <div v-if="categories.length===0" class="empty-state"><p>暂无分类</p></div>
-        </div>
-        <!-- Priorities -->
-        <div v-if="settingsTab==='priorities'">
-          <div class="mgmt-header"><h3>优先级列表</h3><button class="btn btn-primary btn-sm" @click="openPriorityForm()">+ 添加优先级</button></div>
+          <h3 style="font-size:15px;font-weight:600;margin:24px 0 12px">优先级</h3>
+          <div class="mgmt-header"><span></span><button class="btn btn-primary btn-sm" @click="openPriorityForm()">+ 添加优先级</button></div>
           <div v-for="pri in priorities" :key="pri.id" class="lane-list-item">
             <div class="lane-list-item-left"><span class="lane-dot" :style="{background:pri.color}"></span><span>{{pri.name}}</span></div>
             <div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" @click="openPriorityForm(pri)">编辑</button><button class="btn btn-danger btn-sm" @click="deletePriority(pri)">删除</button></div>
@@ -706,17 +772,17 @@ createApp({
 
     async function login(){
       loginError.value='';
-      try{const data=await api('/api/auth/login',{method:'POST',body:JSON.stringify(loginForm.value)});token.value=data.token;localStorage.setItem('token',data.token);currentUser.value=data.user;isLoggedIn.value=true;if(data.user.mustChangePassword)showChangePassword.value=true;await loadData();nextTick(initSortable)}
+      try{const data=await api('/api/auth/login',{method:'POST',body:JSON.stringify(loginForm.value)});token.value=data.token;localStorage.setItem('token',data.token);currentUser.value=data.user;isLoggedIn.value=true;initGanttSettings();initListSettings();initCardSettings();if(data.user.mustChangePassword)showChangePassword.value=true;await loadData();nextTick(initSortable)}
       catch(e){loginError.value=e.message}
     }
     async function register(){
       loginError.value='';
-      try{const data=await api('/api/auth/register',{method:'POST',body:JSON.stringify(registerForm.value)});token.value=data.token;localStorage.setItem('token',data.token);currentUser.value=data.user;isLoggedIn.value=true;await loadData();nextTick(initSortable);showToast('注册成功')}
+      try{const data=await api('/api/auth/register',{method:'POST',body:JSON.stringify(registerForm.value)});token.value=data.token;localStorage.setItem('token',data.token);currentUser.value=data.user;isLoggedIn.value=true;initGanttSettings();initListSettings();initCardSettings();await loadData();nextTick(initSortable);showToast('注册成功')}
       catch(e){loginError.value=e.message}
     }
     async function checkAuth(){
       if(!token.value)return;
-      try{currentUser.value=await api('/api/auth/me');isLoggedIn.value=true;if(currentUser.value.mustChangePassword)showChangePassword.value=true;await loadData();nextTick(initSortable)}
+      try{currentUser.value=await api('/api/auth/me');isLoggedIn.value=true;initGanttSettings();initListSettings();initCardSettings();if(currentUser.value.mustChangePassword)showChangePassword.value=true;await loadData();nextTick(initSortable)}
       catch(e){token.value='';localStorage.removeItem('token')}
     }
     function logout(){token.value='';localStorage.removeItem('token');isLoggedIn.value=false;currentUser.value={}}
@@ -810,19 +876,180 @@ createApp({
     async function savePriority(){try{if(editingPriority.value){await api(`/api/priorities/${editingPriority.value.id}`,{method:'PUT',body:JSON.stringify(priorityForm.value)});showToast('优先级已更新')}else{await api('/api/priorities',{method:'POST',body:JSON.stringify(priorityForm.value)});showToast('优先级已创建')};showPriorityModal.value=false;await loadData()}catch(e){showToast(e.message)}}
     async function deletePriority(pri){if(!confirm(`确定删除优先级 ${pri.name}？`))return;try{await api(`/api/priorities/${pri.id}`,{method:'DELETE'});await loadData();showToast('优先级已删除')}catch(e){showToast(e.message)}}
 
+    // ============ USER-BOUND SETTINGS ============
+    function userKey(key){return key+'_'+(currentUser.value.id||'anon')}
+    function getUserSetting(key,def){try{const v=localStorage.getItem(userKey(key));return v?JSON.parse(v):def}catch(e){return def}}
+    function setUserSetting(key,val){localStorage.setItem(userKey(key),JSON.stringify(val))}
+
+    // ============ LIST VIEW COLUMNS ============
+    const showListColPicker=ref(false);
+    const listColPickerEl=ref(null);
+    const listColOrder=ref([]);
+    const listVisibleCols=ref([]);
+    const listDefaultOrder=[
+      {key:'lane',label:'泳道'},{key:'priority',label:'优先级'},{key:'title',label:'标题',tdClass:'td-title'},
+      {key:'description',label:'描述',tdClass:'td-desc'},{key:'rewardPoints',label:'分值'},
+      {key:'deadline',label:'截止日期'},{key:'startDate',label:'开始日期'},{key:'endDate',label:'结束日期'},
+      {key:'category',label:'分类'},{key:'assignees',label:'认领者'},{key:'creator',label:'创建者'},{key:'createdAt',label:'创建时间'},
+    ];
+    function initListSettings(){
+      listColOrder.value=getUserSetting('listColOrder',listDefaultOrder);
+      listVisibleCols.value=getUserSetting('listVisibleCols',listDefaultOrder.map(f=>f.key));
+    }
+    watch(listVisibleCols,(v)=>{setUserSetting('listVisibleCols',v)},{deep:true});
+    watch(listColOrder,(v)=>{setUserSetting('listColOrder',v)},{deep:true});
+    const listAllFields=computed(()=>listColOrder.value);
+    const listActiveFields=computed(()=>listColOrder.value.filter(f=>listVisibleCols.value.includes(f.key)));
+    watch(showListColPicker,(v)=>{
+      if(v)nextTick(()=>{
+        const el=listColPickerEl.value;
+        if(el&&!el._sortable){
+          el._sortable=Sortable.create(el,{animation:150,handle:'.col-drag-handle',ghostClass:'sortable-ghost',
+            onEnd:(evt)=>{
+              const arr=[...listColOrder.value];
+              const [moved]=arr.splice(evt.oldIndex,1);
+              arr.splice(evt.newIndex,0,moved);
+              listColOrder.value=arr;
+            }
+          });
+        }
+      });
+    });
+    function listFieldValue(task,key){
+      if(key==='title')return task.title;
+      if(key==='description')return task.description||'-';
+      if(key==='rewardPoints')return task.rewardPoints||0;
+      if(key==='deadline')return formatDate(task.deadline)||'-';
+      if(key==='startDate')return formatDate(task.startDate)||'-';
+      if(key==='endDate')return formatDate(task.endDate)||'-';
+      if(key==='assignees')return task.assigneeUsers?.map(a=>a.displayName).join(', ')||'-';
+      if(key==='creator')return task.creatorName||'-';
+      if(key==='createdAt')return formatDate(task.createdAt)||'-';
+      if(key==='category'){const c=categories.value.find(x=>x.id===task.category);return c?c.name:'-'}
+      return '-';
+    }
+
+    // ============ CARD VIEW FIELDS ============
+    const showCardFieldPicker=ref(false);
+    const cardAllFields=[
+      {key:'priority',label:'优先级'},{key:'title',label:'标题'},{key:'rewardPoints',label:'分值'},
+      {key:'description',label:'描述'},{key:'deadline',label:'截止日期'},
+      {key:'startDate',label:'开始日期'},{key:'endDate',label:'结束日期'},
+      {key:'category',label:'分类'},{key:'assignees',label:'认领者'},{key:'creator',label:'创建者'},
+    ];
+    const cardVisibleFields=ref([]);
+    function initCardSettings(){
+      cardVisibleFields.value=getUserSetting('cardVisibleFields',['priority','title','rewardPoints','description','deadline','assignees']);
+    }
+    watch(cardVisibleFields,(v)=>{setUserSetting('cardVisibleFields',v)},{deep:true});
+    function isCardFieldVisible(key){return cardVisibleFields.value.includes(key)}
+
     // ============ GANTT CHART LOGIC ============
+    const ganttDragState=ref(null);
+    const showGanttColPicker=ref(false);
+    const ganttColPickerEl=ref(null);
+    const ganttPendingChanges=ref([]); // [{taskId, startDate, endDate}]
+
+    const ganttColOrder=ref([]);
+    const ganttLeftCols=ref([]);
+    function initGanttSettings(){
+      const defaultOrder=[
+        {key:'title',label:'标题',width:100},{key:'priority',label:'优先级',width:55},{key:'rewardPoints',label:'分值',width:40},
+        {key:'deadline',label:'截止日期',width:80},{key:'startDate',label:'开始日期',width:80},{key:'endDate',label:'结束日期',width:80},
+        {key:'lane',label:'泳道',width:60},{key:'assignees',label:'认领者',width:70},{key:'creator',label:'创建者',width:60},{key:'category',label:'分类',width:60},
+      ];
+      ganttColOrder.value=getUserSetting('ganttColOrder',defaultOrder);
+      ganttLeftCols.value=getUserSetting('ganttLeftCols',['title','priority','rewardPoints']);
+    }
+    watch(ganttLeftCols,(v)=>{setUserSetting('ganttLeftCols',v)},{deep:true});
+    watch(ganttColOrder,(v)=>{setUserSetting('ganttColOrder',v)},{deep:true});
+    const ganttAllFields=computed(()=>ganttColOrder.value);
+    const ganttVisibleFields=computed(()=>ganttColOrder.value.filter(f=>ganttLeftCols.value.includes(f.key)));
+    const ganttLeftWidth=computed(()=>{const w=ganttVisibleFields.value.reduce((s,f)=>s+f.width,0);return Math.max(w+40,160)});
+    function ganttFieldValue(task,key){
+      if(key==='title')return task.title;
+      if(key==='priority')return priorityLabel(task.priority);
+      if(key==='rewardPoints')return task.rewardPoints||0;
+      if(key==='deadline')return task.deadline?formatDate(task.deadline):'';
+      if(key==='startDate')return task.startDate?formatDate(task.startDate):'';
+      if(key==='endDate')return task.endDate?formatDate(task.endDate):'';
+      if(key==='lane')return getLaneName(task.laneId);
+      if(key==='assignees')return task.assigneeUsers?.map(a=>a.displayName).join(',')||'';
+      if(key==='creator')return task.creatorName||'';
+      if(key==='category'){const c=categories.value.find(x=>x.id===task.category);return c?c.name:''}
+      return '';
+    }
+    // Init column picker sortable when shown
+    watch(showGanttColPicker,(v)=>{
+      if(v)nextTick(()=>{
+        const el=ganttColPickerEl.value;
+        if(el&&!el._sortable){
+          el._sortable=Sortable.create(el,{animation:150,handle:'.col-drag-handle',ghostClass:'sortable-ghost',
+            onEnd:(evt)=>{
+              const arr=[...ganttColOrder.value];
+              const [moved]=arr.splice(evt.oldIndex,1);
+              arr.splice(evt.newIndex,0,moved);
+              ganttColOrder.value=arr;
+            }
+          });
+        }
+      });
+    });
+
+    // Expand/Collapse all via single checkbox
+    const ganttAllExpanded=computed(()=>{
+      const cats=ganttCategories.value;
+      if(cats.length===0)return true;
+      return cats.every(cat=>!ganttCollapsed.value[cat.id]);
+    });
+    function toggleGanttExpandAll(checked){
+      const c={};
+      ganttCategories.value.forEach(cat=>{c[cat.id]=!checked});
+      ganttCollapsed.value=c;
+    }
+
     const ganttColWidth=computed(()=>ganttScale.value==='day'?40:ganttScale.value==='week'?80:120);
+
+    // Auto-compute start date based on tasks' date range
     const ganttStartDate=computed(()=>{
-      const d=new Date();d.setHours(0,0,0,0);
-      if(ganttScale.value==='day'){d.setDate(d.getDate()-7+ganttOffset.value*14)}
-      else if(ganttScale.value==='week'){d.setDate(d.getDate()-28+ganttOffset.value*56)}
-      else{d.setMonth(d.getMonth()-3+ganttOffset.value*6)}
+      const tasksWithDates=tasks.value.filter(t=>t.startDate&&t.endDate);
+      const today=new Date();today.setHours(0,0,0,0);
+      let minDate=new Date(today);
+      if(tasksWithDates.length>0){
+        tasksWithDates.forEach(t=>{const s=new Date(t.startDate);if(s<minDate)minDate=new Date(s)});
+      }
+      // Add padding before earliest task
+      const d=new Date(minDate);
+      if(ganttScale.value==='day'){d.setDate(d.getDate()-3+ganttOffset.value*14)}
+      else if(ganttScale.value==='week'){d.setDate(d.getDate()-7+ganttOffset.value*56)}
+      else{d.setMonth(d.getMonth()-1+ganttOffset.value*6)}
+      d.setHours(0,0,0,0);
       return d;
     });
+
+    // Auto-compute column count to cover all tasks
     const ganttCols=computed(()=>{
       const cols=[];const start=new Date(ganttStartDate.value);
-      const count=ganttScale.value==='day'?30:ganttScale.value==='week'?12:12;
       const today=new Date();today.setHours(0,0,0,0);
+      const tasksWithDates=tasks.value.filter(t=>t.startDate&&t.endDate);
+      let maxDate=new Date(start);
+      // Find the furthest end date
+      if(tasksWithDates.length>0){
+        tasksWithDates.forEach(t=>{const e=new Date(t.endDate);if(e>maxDate)maxDate=new Date(e)});
+      }
+      // Ensure today is visible
+      if(today>maxDate)maxDate=new Date(today);
+      // Add padding after latest task
+      const padded=new Date(maxDate);
+      if(ganttScale.value==='day'){padded.setDate(padded.getDate()+7)}
+      else if(ganttScale.value==='week'){padded.setDate(padded.getDate()+14)}
+      else{padded.setMonth(padded.getMonth()+2)}
+      // Minimum columns
+      const minCols=ganttScale.value==='day'?30:ganttScale.value==='week'?12:12;
+      let count=0;
+      if(ganttScale.value==='day'){count=Math.max(minCols,Math.ceil((padded-start)/86400000))}
+      else if(ganttScale.value==='week'){count=Math.max(minCols,Math.ceil((padded-start)/(86400000*7)))}
+      else{count=Math.max(minCols,Math.ceil((padded-start)/(86400000*30)))}
       for(let i=0;i<count;i++){
         const d=new Date(start);
         if(ganttScale.value==='day'){d.setDate(start.getDate()+i);cols.push({key:d.toISOString().slice(0,10),label:`${d.getMonth()+1}/${d.getDate()}`,isToday:d.getTime()===today.getTime(),isWeekend:d.getDay()===0||d.getDay()===6,date:d})}
@@ -844,7 +1071,17 @@ createApp({
     function toggleGanttCat(catId){ganttCollapsed.value={...ganttCollapsed.value,[catId]:!ganttCollapsed.value[catId]}}
     function ganttNavPrev(){ganttOffset.value--}
     function ganttNavNext(){ganttOffset.value++}
-    function ganttNavToday(){ganttOffset.value=0}
+    function ganttNavToday(){
+      ganttOffset.value=0;
+      nextTick(()=>{
+        if(!ganttRight.value)return;
+        const todayOff=ganttTodayOffset.value;
+        if(todayOff>=0){
+          const containerW=ganttRight.value.clientWidth;
+          ganttRight.value.scrollLeft=Math.max(0,todayOff-containerW/2);
+        }
+      });
+    }
     function syncGanttScroll(){}
 
     const ganttRowsHeight=computed(()=>{
@@ -864,20 +1101,25 @@ createApp({
     const ganttBars=computed(()=>{
       const bars=[];const start=ganttCols.value[0]?.date;if(!start)return bars;
       let rowIdx=0;
+      const pending=ganttPendingChanges.value;
       ganttCategories.value.forEach(cat=>{
         rowIdx++;// category row
         if(!ganttCollapsed.value[cat.id]){
           ganttTasksByCat(cat.id).forEach(task=>{
-            const ts=new Date(task.startDate);ts.setHours(0,0,0,0);
-            const te=new Date(task.endDate);te.setHours(0,0,0,0);
+            // Use pending changes if any
+            const pend=pending.find(p=>p.taskId===task.id);
+            const sd=pend?pend.startDate:task.startDate;
+            const ed=pend?pend.endDate:task.endDate;
+            const ts=new Date(sd);ts.setHours(0,0,0,0);
+            const te=new Date(ed);te.setHours(0,0,0,0);
             let leftDays=(ts-start)/86400000;
             let widthDays=(te-ts)/86400000+1;
             let pxPerDay=ganttColWidth.value;
             if(ganttScale.value==='week')pxPerDay=ganttColWidth.value/7;
             if(ganttScale.value==='month')pxPerDay=ganttColWidth.value/30;
-            const left=leftDays*pxPerDay;
-            const width=Math.max(widthDays*pxPerDay,20);
-            bars.push({task,left,top:rowIdx*32+6,width,color:priorityColor(task.priority)});
+            let left=leftDays*pxPerDay;
+            let width=Math.max(widthDays*pxPerDay,20);
+            bars.push({task,left,top:rowIdx*32+6,width,color:priorityColor(task.priority),hasPending:!!pend});
             rowIdx++;
           });
         }
@@ -885,51 +1127,84 @@ createApp({
       return bars;
     });
 
-    // Gantt drag
-    let dragState=null;
+    // Gantt drag - direct DOM manipulation, stores changes in pending list
     function startGanttDrag(e,bar,mode){
       e.preventDefault();
+      const barEl=e.target.closest('.gantt-bar');
+      if(!barEl)return;
       const startX=e.clientX;
       const origLeft=bar.left;
       const origWidth=bar.width;
       let pxPerDay=ganttColWidth.value;
       if(ganttScale.value==='week')pxPerDay=ganttColWidth.value/7;
       if(ganttScale.value==='month')pxPerDay=ganttColWidth.value/30;
-      const taskStart=new Date(bar.task.startDate);taskStart.setHours(0,0,0,0);
-      const taskEnd=new Date(bar.task.endDate);taskEnd.setHours(0,0,0,0);
+      // Get the current dates (could be from pending)
+      const pend=ganttPendingChanges.value.find(p=>p.taskId===bar.task.id);
+      const curStart=pend?pend.startDate:bar.task.startDate;
+      const curEnd=pend?pend.endDate:bar.task.endDate;
+      const taskStart=new Date(curStart);taskStart.setHours(0,0,0,0);
+      const taskEnd=new Date(curEnd);taskEnd.setHours(0,0,0,0);
+      barEl.classList.add('dragging');
+      ganttDragState.value=true;
 
       function onMove(ev){
         const dx=ev.clientX-startX;
         if(mode==='move'){
-          const daysDelta=Math.round(dx/pxPerDay);
-          const ns=new Date(taskStart);ns.setDate(ns.getDate()+daysDelta);
-          const ne=new Date(taskEnd);ne.setDate(ne.getDate()+daysDelta);
-          bar.task._tmpStart=ns.toISOString().slice(0,10);
-          bar.task._tmpEnd=ne.toISOString().slice(0,10);
+          barEl.style.left=(origLeft+dx)+'px';
         }else if(mode==='right'){
-          const daysDelta=Math.round(dx/pxPerDay);
-          const ne=new Date(taskEnd);ne.setDate(ne.getDate()+daysDelta);
-          if(ne>=taskStart)bar.task._tmpEnd=ne.toISOString().slice(0,10);
+          barEl.style.width=Math.max(origWidth+dx,20)+'px';
         }else if(mode==='left'){
-          const daysDelta=Math.round(dx/pxPerDay);
-          const ns=new Date(taskStart);ns.setDate(ns.getDate()+daysDelta);
-          if(ns<=taskEnd)bar.task._tmpStart=ns.toISOString().slice(0,10);
+          barEl.style.left=(origLeft+dx)+'px';
+          barEl.style.width=Math.max(origWidth-dx,20)+'px';
         }
       }
-      async function onUp(){
+      function onUp(ev){
         document.removeEventListener('mousemove',onMove);
         document.removeEventListener('mouseup',onUp);
-        const t=bar.task;
-        const newStart=t._tmpStart||t.startDate;
-        const newEnd=t._tmpEnd||t.endDate;
-        delete t._tmpStart;delete t._tmpEnd;
-        if(newStart!==t.startDate||newEnd!==t.endDate){
-          try{await api(`/api/tasks/${t.id}/dates`,{method:'PUT',body:JSON.stringify({startDate:newStart,endDate:newEnd})});await loadData();showToast('日期已更新')}catch(e){showToast(e.message)}
+        barEl.classList.remove('dragging');
+        ganttDragState.value=null;
+        const dx=ev.clientX-startX;
+        const daysDelta=Math.round(dx/pxPerDay);
+        barEl.style.left='';
+        barEl.style.width='';
+        if(daysDelta===0)return;
+        let newStart=curStart;
+        let newEnd=curEnd;
+        if(mode==='move'){
+          const ns=new Date(taskStart);ns.setDate(ns.getDate()+daysDelta);
+          const ne=new Date(taskEnd);ne.setDate(ne.getDate()+daysDelta);
+          newStart=ns.toISOString().slice(0,10);
+          newEnd=ne.toISOString().slice(0,10);
+        }else if(mode==='right'){
+          const ne=new Date(taskEnd);ne.setDate(ne.getDate()+daysDelta);
+          if(ne>=taskStart)newEnd=ne.toISOString().slice(0,10);
+        }else if(mode==='left'){
+          const ns=new Date(taskStart);ns.setDate(ns.getDate()+daysDelta);
+          if(ns<=taskEnd)newStart=ns.toISOString().slice(0,10);
+        }
+        if(newStart!==curStart||newEnd!==curEnd){
+          // Add or update pending change
+          const idx=ganttPendingChanges.value.findIndex(p=>p.taskId===bar.task.id);
+          if(idx>=0)ganttPendingChanges.value.splice(idx,1,{taskId:bar.task.id,startDate:newStart,endDate:newEnd});
+          else ganttPendingChanges.value.push({taskId:bar.task.id,startDate:newStart,endDate:newEnd});
         }
       }
       document.addEventListener('mousemove',onMove);
       document.addEventListener('mouseup',onUp);
     }
+
+    async function ganttSaveChanges(){
+      const changes=[...ganttPendingChanges.value];
+      try{
+        for(const ch of changes){
+          await api(`/api/tasks/${ch.taskId}/dates`,{method:'PUT',body:JSON.stringify({startDate:ch.startDate,endDate:ch.endDate})});
+        }
+        ganttPendingChanges.value=[];
+        await loadData();
+        showToast(`已保存${changes.length}项修改`);
+      }catch(e){showToast(e.message)}
+    }
+    function ganttDiscardChanges(){ganttPendingChanges.value=[]}
 
     onMounted(async()=>{document.documentElement.setAttribute('data-theme',isDark.value?'dark':'light');try{const s=await(await fetch('/api/settings')).json();sysSettings.value={systemName:'任务看板',systemIcon:'📋',menuNames:{board:'看板',settings:'系统设置'},menuIcons:{board:'📋',settings:'⚙️'},...s}}catch(e){};checkAuth()});
     watch(currentView,v=>{if(v==='board'&&viewMode.value==='card')nextTick(initSortable)});
@@ -947,8 +1222,13 @@ createApp({
       openGroupForm,saveGroup,deleteGroup,openLaneForm,saveLane,deleteLane,
       openCategoryForm,saveCategory,deleteCategory,openPriorityForm,savePriority,deletePriority,
       toggleSetting,saveSettings,formatDate,formatDateTime,isOverdue,
+      showListColPicker,listColPickerEl,listColOrder,listAllFields,listVisibleCols,listActiveFields,listFieldValue,
+      showCardFieldPicker,cardAllFields,cardVisibleFields,isCardFieldVisible,
       ganttScale,ganttOffset,ganttCollapsed,ganttRight,ganttColWidth,ganttCols,ganttCategories,ganttTasksByCat,
-      toggleGanttCat,ganttNavPrev,ganttNavNext,ganttNavToday,syncGanttScroll,ganttRowsHeight,ganttTodayOffset,ganttBars,startGanttDrag
+      toggleGanttCat,ganttNavPrev,ganttNavNext,ganttNavToday,syncGanttScroll,ganttRowsHeight,ganttTodayOffset,ganttBars,startGanttDrag,
+      ganttDragState,showGanttColPicker,ganttLeftCols,ganttAllFields,ganttVisibleFields,ganttLeftWidth,ganttFieldValue,
+      ganttColPickerEl,ganttColOrder,ganttAllExpanded,toggleGanttExpandAll,
+      ganttPendingChanges,ganttSaveChanges,ganttDiscardChanges
     };
   }
 }).mount('#app');
