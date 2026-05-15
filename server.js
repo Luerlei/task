@@ -41,6 +41,13 @@ const defaultData = {
     { id: uuidv4(), name: '已完成', order: 3, color: '#34C759' }
   ],
   groups: [],
+  categories: [],
+  priorities: [
+    { id: 'tian', name: '天', color: '#FF3B30', order: 1 },
+    { id: 'di', name: '地', color: '#FF9500', order: 2 },
+    { id: 'xuan', name: '玄', color: '#007AFF', order: 3 },
+    { id: 'huang', name: '黄', color: '#34C759', order: 4 }
+  ],
   comments: [],
   pointsHistory: [],
   settings: {
@@ -64,6 +71,15 @@ if (!db.data.users || db.data.users.length === 0) {
 }
 if (!db.data.settings) {
   db.data.settings = { allowRegistration: true, taskVisibilityControl: false, systemName: '任务看板', systemIcon: '📋', menuNames: { board: '看板', settings: '系统设置' }, menuIcons: { board: '📋', settings: '⚙️' } };
+}
+if (!db.data.categories) db.data.categories = [];
+if (!db.data.priorities || db.data.priorities.length === 0) {
+  db.data.priorities = [
+    { id: 'tian', name: '天', color: '#FF3B30', order: 1 },
+    { id: 'di', name: '地', color: '#FF9500', order: 2 },
+    { id: 'xuan', name: '玄', color: '#007AFF', order: 3 },
+    { id: 'huang', name: '黄', color: '#34C759', order: 4 }
+  ];
 }
 await db.write();
 
@@ -309,13 +325,14 @@ app.get('/api/tasks', authMiddleware, (req, res) => {
       const u = db.data.users.find(user => user.id === aid);
       return u ? { id: u.id, displayName: u.displayName, group: u.group } : null;
     }).filter(Boolean);
-    return { ...task, creatorName: creator?.displayName || '未知', assigneeUsers };
+    const creatorUser = creator ? { id: creator.id, displayName: creator.displayName } : null;
+    return { ...task, creatorName: creator?.displayName || '未知', assigneeUsers, creatorUser };
   });
   res.json(tasks);
 });
 
 app.post('/api/tasks', authMiddleware, adminOnly, async (req, res) => {
-  const { title, description, rewardPoints, deadline, priority } = req.body;
+  const { title, description, rewardPoints, deadline, priority, startDate, endDate, category } = req.body;
   if (!title) return res.status(400).json({ error: '请输入任务标题' });
   const firstLane = db.data.lanes.sort((a, b) => a.order - b.order)[0];
   const task = {
@@ -328,6 +345,9 @@ app.post('/api/tasks', authMiddleware, adminOnly, async (req, res) => {
     rewardPoints: rewardPoints || 0,
     deadline: deadline || null,
     priority: priority || 'xuan',
+    startDate: startDate || null,
+    endDate: endDate || null,
+    category: category || '',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     completedAt: null
@@ -340,12 +360,26 @@ app.post('/api/tasks', authMiddleware, adminOnly, async (req, res) => {
 app.put('/api/tasks/:id', authMiddleware, adminOnly, async (req, res) => {
   const task = db.data.tasks.find(t => t.id === req.params.id);
   if (!task) return res.status(404).json({ error: '任务不存在' });
-  const { title, description, rewardPoints, deadline, priority } = req.body;
+  const { title, description, rewardPoints, deadline, priority, startDate, endDate, category } = req.body;
   if (title) task.title = title;
   if (description !== undefined) task.description = description;
   if (rewardPoints !== undefined) task.rewardPoints = rewardPoints;
   if (deadline !== undefined) task.deadline = deadline;
   if (priority) task.priority = priority;
+  if (startDate !== undefined) task.startDate = startDate;
+  if (endDate !== undefined) task.endDate = endDate;
+  if (category !== undefined) task.category = category;
+  task.updatedAt = new Date().toISOString();
+  await db.write();
+  res.json(task);
+});
+
+app.put('/api/tasks/:id/dates', authMiddleware, async (req, res) => {
+  const task = db.data.tasks.find(t => t.id === req.params.id);
+  if (!task) return res.status(404).json({ error: '任务不存在' });
+  const { startDate, endDate } = req.body;
+  if (startDate !== undefined) task.startDate = startDate;
+  if (endDate !== undefined) task.endDate = endDate;
   task.updatedAt = new Date().toISOString();
   await db.write();
   res.json(task);
@@ -490,6 +524,76 @@ app.get('/api/leaderboard', authMiddleware, (req, res) => {
     .map(({ password, ...u }) => u)
     .sort((a, b) => b.totalPoints - a.totalPoints);
   res.json(leaderboard);
+});
+
+// ==================== CATEGORIES API ====================
+
+app.get('/api/categories', authMiddleware, (req, res) => {
+  const categories = [...(db.data.categories || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
+  res.json(categories);
+});
+
+app.post('/api/categories', authMiddleware, adminOnly, async (req, res) => {
+  const { name, color } = req.body;
+  if (!name) return res.status(400).json({ error: '请输入分类名称' });
+  const maxOrder = (db.data.categories || []).reduce((max, c) => Math.max(max, c.order || 0), -1);
+  const category = { id: uuidv4(), name, color: color || '#8E8E93', order: maxOrder + 1 };
+  db.data.categories.push(category);
+  await db.write();
+  res.json(category);
+});
+
+app.put('/api/categories/:id', authMiddleware, adminOnly, async (req, res) => {
+  const cat = db.data.categories.find(c => c.id === req.params.id);
+  if (!cat) return res.status(404).json({ error: '分类不存在' });
+  if (req.body.name) cat.name = req.body.name;
+  if (req.body.color) cat.color = req.body.color;
+  if (req.body.order !== undefined) cat.order = req.body.order;
+  await db.write();
+  res.json(cat);
+});
+
+app.delete('/api/categories/:id', authMiddleware, adminOnly, async (req, res) => {
+  const idx = db.data.categories.findIndex(c => c.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: '分类不存在' });
+  db.data.categories.splice(idx, 1);
+  await db.write();
+  res.json({ message: '删除成功' });
+});
+
+// ==================== PRIORITIES API ====================
+
+app.get('/api/priorities', authMiddleware, (req, res) => {
+  const priorities = [...(db.data.priorities || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
+  res.json(priorities);
+});
+
+app.post('/api/priorities', authMiddleware, adminOnly, async (req, res) => {
+  const { name, color } = req.body;
+  if (!name) return res.status(400).json({ error: '请输入优先级名称' });
+  const maxOrder = (db.data.priorities || []).reduce((max, p) => Math.max(max, p.order || 0), -1);
+  const priority = { id: uuidv4(), name, color: color || '#8E8E93', order: maxOrder + 1 };
+  db.data.priorities.push(priority);
+  await db.write();
+  res.json(priority);
+});
+
+app.put('/api/priorities/:id', authMiddleware, adminOnly, async (req, res) => {
+  const pri = db.data.priorities.find(p => p.id === req.params.id);
+  if (!pri) return res.status(404).json({ error: '优先级不存在' });
+  if (req.body.name) pri.name = req.body.name;
+  if (req.body.color) pri.color = req.body.color;
+  if (req.body.order !== undefined) pri.order = req.body.order;
+  await db.write();
+  res.json(pri);
+});
+
+app.delete('/api/priorities/:id', authMiddleware, adminOnly, async (req, res) => {
+  const idx = db.data.priorities.findIndex(p => p.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: '优先级不存在' });
+  db.data.priorities.splice(idx, 1);
+  await db.write();
+  res.json({ message: '删除成功' });
 });
 
 app.get('/api/leaderboard/:userId/history', authMiddleware, (req, res) => {
