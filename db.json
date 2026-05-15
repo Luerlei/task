@@ -1,0 +1,123 @@
+{
+  "users": [
+    {
+      "id": "9f7926da-5267-4f49-9e08-7131ebb7228b",
+      "username": "admin",
+      "password": "$2a$10$iJFAwM22ui79GwnnOvxkge8xAPmh7Zm.cd.Fgr1N1kTHJxegriUN2",
+      "displayName": "管理员",
+      "role": "admin",
+      "group": "",
+      "totalPoints": 0,
+      "mustChangePassword": true,
+      "createdAt": "2026-05-15T09:28:10.095Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "76b4551c-0599-434b-adf8-c11b717316b1",
+      "title": "aa",
+      "description": "aa",
+      "creatorId": "9f7926da-5267-4f49-9e08-7131ebb7228b",
+      "assignees": [],
+      "laneId": "2f0db1a1-1685-4ecb-9b1c-e6f89536bcba",
+      "rewardPoints": 0,
+      "deadline": null,
+      "priority": "xuan",
+      "createdAt": "2026-05-15T09:33:43.362Z",
+      "updatedAt": "2026-05-15T10:18:43.484Z",
+      "completedAt": null
+    },
+    {
+      "id": "c0186cd6-c7a9-4135-a314-a04063852da6",
+      "title": "bb",
+      "description": "bb",
+      "creatorId": "9f7926da-5267-4f49-9e08-7131ebb7228b",
+      "assignees": [],
+      "laneId": "63972a4a-96da-4d48-9bdb-96b3b3878a06",
+      "rewardPoints": 0,
+      "deadline": null,
+      "priority": "xuan",
+      "createdAt": "2026-05-15T09:33:50.195Z",
+      "updatedAt": "2026-05-15T10:18:10.542Z",
+      "completedAt": null
+    },
+    {
+      "id": "864d587c-be80-4680-badd-d71f37de12ad",
+      "title": "cc",
+      "description": "cc",
+      "creatorId": "9f7926da-5267-4f49-9e08-7131ebb7228b",
+      "assignees": [],
+      "laneId": "63972a4a-96da-4d48-9bdb-96b3b3878a06",
+      "rewardPoints": 0,
+      "deadline": null,
+      "priority": "xuan",
+      "createdAt": "2026-05-15T09:34:17.743Z",
+      "updatedAt": "2026-05-15T10:18:11.725Z",
+      "completedAt": null
+    }
+  ],
+  "lanes": [
+    {
+      "id": "63972a4a-96da-4d48-9bdb-96b3b3878a06",
+      "name": "待认领",
+      "order": 0,
+      "color": "#007AFF"
+    },
+    {
+      "id": "2f0db1a1-1685-4ecb-9b1c-e6f89536bcba",
+      "name": "进行中",
+      "order": 1,
+      "color": "#FF9500"
+    },
+    {
+      "id": "9ff64b2f-d936-48e2-8d05-816c29a4ee7a",
+      "name": "待验收",
+      "order": 2,
+      "color": "#AF52DE"
+    },
+    {
+      "id": "9ae7cf73-fe1a-41f7-bfff-3959e7b913f6",
+      "name": "已完成",
+      "order": 3,
+      "color": "#34C759"
+    },
+    {
+      "id": "c2603725-8985-4a4d-a10c-b1cf0ab8bf19",
+      "name": "aa",
+      "order": 4,
+      "color": "#007AFF"
+    }
+  ],
+  "groups": [],
+  "comments": [
+    {
+      "id": "b8ae5685-279f-4057-ac2d-df9cdece4229",
+      "taskId": "c0186cd6-c7a9-4135-a314-a04063852da6",
+      "userId": "9f7926da-5267-4f49-9e08-7131ebb7228b",
+      "content": "aaa",
+      "createdAt": "2026-05-15T10:27:21.393Z"
+    },
+    {
+      "id": "1c582d1a-b057-423a-80c2-2e1e80ae205d",
+      "taskId": "c0186cd6-c7a9-4135-a314-a04063852da6",
+      "userId": "9f7926da-5267-4f49-9e08-7131ebb7228b",
+      "content": "22",
+      "createdAt": "2026-05-15T10:27:27.113Z"
+    }
+  ],
+  "pointsHistory": [],
+  "settings": {
+    "allowRegistration": true,
+    "taskVisibilityControl": false,
+    "systemName": "任务看板",
+    "systemIcon": "📋",
+    "menuNames": {
+      "board": "看板",
+      "settings": "系统设置"
+    },
+    "menuIcons": {
+      "board": "📋",
+      "settings": "⚙️"
+    }
+  }
+}

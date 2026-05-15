@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>任务看板</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <style>
+    :root{--bg-primary:#FFFFFF;--bg-secondary:#F5F5F7;--bg-tertiary:#E8E8ED;--text-primary:#1D1D1F;--text-secondary:#6E6E73;--text-tertiary:#AEAEB2;--border-color:#E5E5EA;--card-bg:#FFFFFF;--card-shadow:0 2px 12px rgba(0,0,0,0.08);--sidebar-bg:#F5F5F7;--accent:#007AFF;--accent-hover:#0056CC;--danger:#FF3B30;--success:#34C759;--warning:#FF9500;--purple:#AF52DE;--overlay:rgba(0,0,0,0.4);--radius:12px;--radius-sm:8px;--transition:0.3s cubic-bezier(0.4,0,0.2,1)}
+    [data-theme="dark"]{--bg-primary:#1D1D1F;--bg-secondary:#2C2C2E;--bg-tertiary:#3A3A3C;--text-primary:#F5F5F7;--text-secondary:#A1A1A6;--text-tertiary:#636366;--border-color:#38383A;--card-bg:#2C2C2E;--card-shadow:0 2px 12px rgba(0,0,0,0.3);--sidebar-bg:#2C2C2E;--overlay:rgba(0,0,0,0.6)}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-primary);color:var(--text-primary);transition:background var(--transition),color var(--transition);height:100vh;overflow:hidden}
+    .login-page{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg-secondary)}
+    .login-card{background:var(--card-bg);border-radius:20px;padding:48px 40px;width:380px;box-shadow:var(--card-shadow)}
+    .login-card h1{font-size:28px;font-weight:700;text-align:center;margin-bottom:8px}
+    .login-card p{text-align:center;color:var(--text-secondary);margin-bottom:32px;font-size:14px}
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
+    .form-input{width:100%;padding:11px 14px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-size:14px;background:var(--bg-secondary);color:var(--text-primary);transition:border-color 0.2s;outline:none}
+    .form-input:focus{border-color:var(--accent)}
+    .btn{padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:var(--accent-hover)}
+    .btn-block{width:100%}
+    .btn-secondary{background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color)}
+    .btn-secondary:hover{background:var(--bg-tertiary)}
+    .btn-danger{background:var(--danger);color:#fff}
+    .btn-danger:hover{opacity:0.85}
+    .btn-sm{padding:6px 12px;font-size:12px;border-radius:6px}
+    .error-msg{color:var(--danger);font-size:13px;margin-top:12px;text-align:center}
+    .link-btn{color:var(--accent);cursor:pointer;font-size:13px;text-align:center;margin-top:16px}
+    .link-btn:hover{text-decoration:underline}
+
+    /* Layout */
+    .app-layout{display:flex;height:100vh}
+    .sidebar{width:220px;background:var(--sidebar-bg);border-right:1px solid var(--border-color);display:flex;flex-direction:column;flex-shrink:0;transition:background var(--transition)}
+    .sidebar-logo{padding:16px;font-size:16px;font-weight:700;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:8px}
+    .sidebar-section{padding:12px;flex:1;overflow-y:auto}
+    .sidebar-section h4{font-size:11px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:10px;font-weight:600;letter-spacing:0.5px;padding:0 4px}
+    .lb-list{display:flex;flex-direction:column;gap:6px}
+    .lb-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);background:var(--card-bg);box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+    .lb-row .rank{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;background:var(--bg-tertiary);color:var(--text-secondary);flex-shrink:0}
+    .lb-row .rank.r1{background:#FFD60A;color:#1D1D1F}
+    .lb-row .rank.r2{background:#C0C0C0;color:#1D1D1F}
+    .lb-row .rank.r3{background:#CD7F32;color:#fff}
+    .lb-row .name{flex:1;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .lb-row .pts{font-size:12px;font-weight:700;color:var(--warning)}
+    .sidebar-bottom{padding:12px;border-top:1px solid var(--border-color)}
+    .group-filter{display:flex;align-items:center;padding:4px 0;font-size:12px;color:var(--text-secondary);cursor:pointer}
+    .group-filter input{margin-right:6px}
+
+    .main-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    /* Topbar - simplified */
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border-color);background:var(--bg-primary);flex-shrink:0}
+    .topbar-left{display:flex;align-items:center;gap:12px}
+    .topbar-nav{display:flex;gap:2px;background:var(--bg-secondary);border-radius:var(--radius-sm);padding:3px}
+    .topbar-nav-item{padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-secondary);transition:all 0.2s;white-space:nowrap}
+    .topbar-nav-item:hover{color:var(--text-primary)}
+    .topbar-nav-item.active{background:var(--accent);color:#fff}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .theme-toggle{width:32px;height:32px;border-radius:50%;border:1px solid var(--border-color);background:var(--bg-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+    .theme-toggle:hover{background:var(--bg-tertiary)}
+    .user-info{display:flex;align-items:center;gap:6px;font-size:12px}
+    .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+    .logout-btn{font-size:11px;color:var(--text-secondary);cursor:pointer;padding:4px 6px;border-radius:4px}
+    .logout-btn:hover{color:var(--danger)}
+
+    /* Board toolbar - moved from topbar */
+    .board-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;flex-shrink:0;gap:12px;border-bottom:1px solid var(--border-color);background:var(--bg-secondary)}
+    .board-toolbar-left{display:flex;align-items:center;gap:10px}
+    .search-box{padding:7px 14px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-primary);font-size:13px;width:180px;outline:none}
+    .search-box:focus{border-color:var(--accent)}
+    .filter-select{padding:6px 10px;border-radius:6px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-primary);font-size:12px;outline:none;cursor:pointer}
+    .filter-select:focus{border-color:var(--accent)}
+    .board-toolbar-right{display:flex;align-items:center;gap:8px}
+    .view-btns{display:flex;border:1px solid var(--border-color);border-radius:6px;overflow:hidden}
+    .view-btn{padding:5px 10px;font-size:12px;cursor:pointer;background:var(--bg-primary);border:none;color:var(--text-secondary);transition:all 0.2s}
+    .view-btn.active{background:var(--accent);color:#fff}
+    .orient-btn{padding:5px 10px;font-size:12px;cursor:pointer;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-secondary)}
+    .orient-btn:hover{background:var(--bg-tertiary)}
+
+    /* Board */
+    .board-page{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .board-container{flex:1;overflow:hidden;padding:16px 20px;display:flex;gap:14px;min-height:0;align-items:stretch}
+    .board-container.vertical{flex-direction:column;align-items:stretch;overflow-x:hidden;overflow-y:auto}
+    .board-container.vertical .lane{min-width:unset;max-width:unset;width:100%;flex:1;min-height:0;max-height:unset;overflow:hidden}
+    .board-container.vertical .lane-body{flex-direction:row;flex-wrap:wrap;overflow-x:hidden;overflow-y:auto;align-items:flex-start;gap:10px}
+    .board-container.vertical .lane-body .task-card{width:260px;flex-shrink:0}
+    .lane{flex:1;min-width:0;background:var(--bg-secondary);border-radius:var(--radius);display:flex;flex-direction:column;overflow:hidden}
+    .lane-header{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-color);flex-shrink:0}
+    .lane-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+    .lane-dot{width:8px;height:8px;border-radius:50%}
+    .lane-count{font-size:11px;color:var(--text-tertiary);background:var(--bg-tertiary);padding:2px 7px;border-radius:10px}
+    .lane-body{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;align-content:flex-start}
+    .lane-body::-webkit-scrollbar{width:4px}
+    .lane-body::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:2px}
+    .task-card{background:var(--card-bg);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--card-shadow);cursor:grab;transition:transform 0.2s,box-shadow 0.2s;border-left:3px solid transparent;width:100%}
+    .task-card:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+    .task-card.sortable-ghost{opacity:0.4}
+    .task-card.priority-tian{border-left-color:var(--danger)}
+    .task-card.priority-di{border-left-color:var(--warning)}
+    .task-card.priority-xuan{border-left-color:var(--accent)}
+    .task-card.priority-huang{border-left-color:var(--success)}
+    .tc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
+    .tc-header-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+    .ptag{font-size:10px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0}
+    .ptag.p-tian{background:rgba(255,59,48,0.12);color:var(--danger)}
+    .ptag.p-di{background:rgba(255,149,0,0.12);color:var(--warning)}
+    .ptag.p-xuan{background:rgba(0,122,255,0.12);color:var(--accent)}
+    .ptag.p-huang{background:rgba(52,199,89,0.12);color:var(--success)}
+    .tc-title{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .tc-pts{font-size:10px;font-weight:700;color:var(--warning);background:rgba(255,149,0,0.1);padding:2px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+    .tc-desc{font-size:11px;color:var(--text-secondary);line-height:1.4;margin-bottom:6px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+    .tc-footer{display:flex;align-items:center;justify-content:space-between;font-size:11px}
+    .tc-deadline{color:var(--text-tertiary)}
+    .tc-deadline.overdue{color:var(--danger);font-weight:600}
+    .task-card.is-overdue{border-left-color:var(--danger)!important;background:linear-gradient(135deg,var(--card-bg) 92%,rgba(255,59,48,0.08))}
+    .task-card.is-overdue .overdue-badge{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:600;color:#fff;background:var(--danger);padding:1px 6px;border-radius:4px;margin-left:6px}
+    .overdue-badge{display:none}
+    .tc-assignees{display:flex}
+    .tc-avatar{width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;margin-left:-3px;border:2px solid var(--card-bg)}
+    .tc-avatar:first-child{margin-left:0}
+
+    /* List view */
+    .list-view{flex:1;overflow:auto;padding:16px 20px}
+    .list-table{width:100%;border-collapse:collapse;background:var(--card-bg);border-radius:var(--radius);overflow:hidden;box-shadow:var(--card-shadow);font-size:12px}
+    .list-table th,.list-table td{padding:10px 12px;text-align:left;white-space:nowrap}
+    .list-table th{background:var(--bg-secondary);font-weight:600;color:var(--text-secondary);font-size:11px;position:sticky;top:0;z-index:1}
+    .list-table tr:not(:last-child) td{border-bottom:1px solid var(--border-color)}
+    .list-table tr:hover td{background:var(--bg-secondary)}
+    .list-table .td-title{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .list-table .td-desc{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)}
+
+    .fab{position:fixed;bottom:28px;right:28px;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(0,122,255,0.4);transition:transform 0.2s;z-index:100}
+    .fab:hover{transform:scale(1.1)}
+
+    /* Panel */
+    .panel-overlay{position:fixed;inset:0;background:var(--overlay);z-index:200;opacity:0;visibility:hidden;transition:opacity 0.3s,visibility 0.3s}
+    .panel-overlay.active{opacity:1;visibility:visible}
+    .slide-panel{position:fixed;top:0;right:-480px;width:480px;height:100vh;background:var(--bg-primary);z-index:201;transition:right 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,0.1)}
+    .slide-panel.active{right:0}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color);flex-shrink:0}
+    .panel-header h3{font-size:18px;font-weight:600}
+    .panel-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--bg-secondary);color:var(--text-primary);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+    .panel-body{flex:1;overflow-y:auto;padding:24px}
+    .panel-footer{padding:16px 24px;border-top:1px solid var(--border-color);display:flex;gap:12px;justify-content:flex-end;flex-shrink:0}
+
+    /* Settings */
+    .settings-container{padding:24px;overflow-y:auto;flex:1}
+    .settings-tabs{display:flex;gap:0;border-bottom:1px solid var(--border-color);margin-bottom:24px}
+    .settings-tab{padding:10px 20px;font-size:14px;font-weight:500;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s}
+    .settings-tab:hover{color:var(--text-primary)}
+    .settings-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .mgmt-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .mgmt-header h3{font-size:16px;font-weight:600}
+    .data-table{width:100%;border-collapse:collapse;background:var(--card-bg);border-radius:var(--radius);overflow:hidden;box-shadow:var(--card-shadow)}
+    .data-table th,.data-table td{padding:10px 12px;text-align:left;font-size:13px}
+    .data-table th{background:var(--bg-secondary);font-weight:600;color:var(--text-secondary);font-size:12px}
+    .data-table tr:not(:last-child) td{border-bottom:1px solid var(--border-color)}
+    .data-table .actions{display:flex;gap:6px}
+    .badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+    .badge-admin{background:rgba(0,122,255,0.1);color:var(--accent)}
+    .badge-member{background:rgba(52,199,89,0.1);color:var(--success)}
+    .lane-list-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card-bg);border-radius:var(--radius-sm);margin-bottom:8px;box-shadow:var(--card-shadow)}
+    .lane-list-item-left{display:flex;align-items:center;gap:12px}
+    .setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--card-bg);border-radius:var(--radius-sm);margin-bottom:8px;box-shadow:var(--card-shadow)}
+    .setting-row label{font-size:14px;font-weight:500}
+    .setting-row .desc{font-size:12px;color:var(--text-secondary);margin-top:2px}
+    .setting-input-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--card-bg);border-radius:var(--radius-sm);margin-bottom:8px;box-shadow:var(--card-shadow);gap:12px}
+    .setting-input-row label{font-size:14px;font-weight:500;white-space:nowrap;flex-shrink:0}
+    .setting-input-row input{flex:1;max-width:200px;padding:7px 12px;border:1px solid var(--border-color);border-radius:6px;font-size:13px;background:var(--bg-secondary);color:var(--text-primary);outline:none}
+    .setting-input-row input:focus{border-color:var(--accent)}
+    .toggle{position:relative;width:44px;height:24px;background:var(--bg-tertiary);border-radius:12px;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+    .toggle.on{background:var(--accent)}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+    .toggle.on::after{transform:translateX(20px)}
+
+    /* Comments */
+    .comments-section{margin-top:24px;border-top:1px solid var(--border-color);padding-top:16px}
+    .comments-section h4{font-size:14px;font-weight:600;margin-bottom:12px}
+    .comment-item{padding:10px 0;border-bottom:1px solid var(--border-color)}
+    .comment-item:last-child{border-bottom:none}
+    .comment-header{display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+    .comment-content{font-size:13px;line-height:1.5}
+    .comment-input{display:flex;gap:8px;margin-top:12px}
+    .comment-input input{flex:1;padding:8px 12px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text-primary);font-size:13px;outline:none}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:var(--overlay);z-index:300;display:flex;align-items:center;justify-content:center}
+    .modal{background:var(--bg-primary);border-radius:var(--radius);padding:32px;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    .modal h3{margin-bottom:20px;font-size:18px}
+    .toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:var(--radius-sm);background:var(--text-primary);color:var(--bg-primary);font-size:13px;z-index:999;animation:slideIn 0.3s ease}
+    @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .empty-state{text-align:center;padding:30px 16px;color:var(--text-tertiary)}
+    .empty-state p{font-size:13px;margin-top:6px}
+    select.form-input{appearance:none;cursor:pointer}
+    textarea.form-input{resize:vertical;min-height:80px;font-family:inherit}
+  </style>
+</head>
+<body>
+<div id="app">
+  <div v-if="toast.show" class="toast">{{toast.message}}</div>
+
+  <!-- Login / Register -->
+  <div v-if="!isLoggedIn" class="login-page">
+    <div class="login-card">
+      <h1>{{sysSettings.systemIcon}} {{sysSettings.systemName}}</h1>
+      <p>部门任务管理系统</p>
+      <template v-if="authMode==='login'">
+        <div class="form-group"><label>用户名</label><input class="form-input" v-model="loginForm.username" @keyup.enter="login" placeholder="请输入用户名"></div>
+        <div class="form-group"><label>密码</label><input class="form-input" type="password" v-model="loginForm.password" @keyup.enter="login" placeholder="请输入密码"></div>
+        <button class="btn btn-primary btn-block" @click="login">登录</button>
+        <div v-if="loginError" class="error-msg">{{loginError}}</div>
+        <div v-if="sysSettings.allowRegistration" class="link-btn" @click="authMode='register'">没有账号？立即注册</div>
+      </template>
+      <template v-if="authMode==='register'">
+        <div class="form-group"><label>用户名</label><input class="form-input" v-model="registerForm.username" placeholder="2-20字符"></div>
+        <div class="form-group"><label>密码</label><input class="form-input" type="password" v-model="registerForm.password" placeholder="至少6位"></div>
+        <div class="form-group"><label>显示名称</label><input class="form-input" v-model="registerForm.displayName" placeholder="你的昵称"></div>
+        <button class="btn btn-primary btn-block" @click="register">注册</button>
+        <div v-if="loginError" class="error-msg">{{loginError}}</div>
+        <div class="link-btn" @click="authMode='login'">已有账号？返回登录</div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Change Password -->
+  <div v-if="showChangePassword" class="modal-overlay">
+    <div class="modal">
+      <h3>修改密码</h3>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">首次登录请修改默认密码</p>
+      <div class="form-group"><label>旧密码</label><input class="form-input" type="password" v-model="passwordForm.oldPassword"></div>
+      <div class="form-group"><label>新密码</label><input class="form-input" type="password" v-model="passwordForm.newPassword"></div>
+      <div class="form-group"><label>确认新密码</label><input class="form-input" type="password" v-model="passwordForm.confirmPassword"></div>
+      <div style="display:flex;gap:12px;justify-content:flex-end"><button class="btn btn-secondary" @click="showChangePassword=false">稍后再说</button><button class="btn btn-primary" @click="changePassword">确认修改</button></div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div v-if="isLoggedIn" class="app-layout">
+    <!-- Sidebar: Leaderboard -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">{{sysSettings.systemIcon}} {{sysSettings.systemName}}</div>
+      <div class="sidebar-section">
+        <h4>🏆 积分排行</h4>
+        <div class="lb-list">
+          <div class="lb-row" v-for="(u,idx) in leaderboard.slice(0,15)" :key="u.id">
+            <span class="rank" :class="idx<3?'r'+(idx+1):''">{{idx+1}}</span>
+            <span class="name">{{u.displayName}}</span>
+            <span class="pts">{{u.totalPoints}}</span>
+          </div>
+          <div v-if="leaderboard.length===0" style="font-size:12px;color:var(--text-tertiary);padding:8px">暂无数据</div>
+        </div>
+      </div>
+      <div class="sidebar-bottom" v-if="groups.length>0">
+        <h4 style="font-size:11px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;font-weight:600;letter-spacing:0.5px">分组筛选</h4>
+        <label class="group-filter" v-for="g in groups" :key="g.id"><input type="checkbox" :value="g.name" v-model="selectedGroups"> {{g.name}}</label>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- Topbar: nav + user -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-nav">
+            <div class="topbar-nav-item" :class="{active:currentView==='board'}" @click="currentView='board'"><span v-if="sysSettings.menuIcons?.board">{{sysSettings.menuIcons.board}}</span> {{sysSettings.menuNames?.board||'看板'}}</div>
+            <div v-if="isAdmin" class="topbar-nav-item" :class="{active:currentView==='settings'}" @click="currentView='settings'"><span v-if="sysSettings.menuIcons?.settings">{{sysSettings.menuIcons.settings}}</span> {{sysSettings.menuNames?.settings||'系统设置'}}</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="theme-toggle" @click="toggleTheme">{{isDark?'☀️':'🌙'}}</button>
+          <div class="user-info"><div class="user-avatar">{{currentUser.displayName?.charAt(0)}}</div><span>{{currentUser.displayName}}</span></div>
+          <span class="logout-btn" @click="logout">退出</span>
+        </div>
+      </header>
+
+      <!-- Board toolbar (search + view switches) -->
+      <div v-if="currentView==='board'" class="board-toolbar">
+        <div class="board-toolbar-left">
+          <input class="search-box" v-model="searchQuery" placeholder="搜索任务...">
+          <select class="filter-select" v-model="filterPriority"><option value="">全部优先级</option><option value="tian">天</option><option value="di">地</option><option value="xuan">玄</option><option value="huang">黄</option></select>
+          <select class="filter-select" v-model="filterAssignee"><option value="">全部认领者</option><option v-for="u in allUsers" :key="u.id" :value="u.id">{{u.displayName||u.username}}</option></select>
+          <select class="filter-select" v-model="filterCreator"><option value="">全部创建者</option><option v-for="u in allUsers" :key="u.id" :value="u.id">{{u.displayName||u.username}}</option></select>
+        </div>
+        <div class="board-toolbar-right">
+          <button v-if="viewMode==='card'" class="orient-btn" @click="toggleOrientation" :title="orientation==='h'?'切换纵向':'切换横向'">{{orientation==='h'?'↕ 纵向':'↔ 横向'}}</button>
+          <div class="view-btns">
+            <button class="view-btn" :class="{active:viewMode==='card'}" @click="setViewMode('card')">卡片</button>
+            <button class="view-btn" :class="{active:viewMode==='list'}" @click="setViewMode('list')">列表</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Board: Card View -->
+      <div v-if="currentView==='board'&&viewMode==='card'" class="board-page">
+        <div class="board-container" :class="{vertical:orientation==='v'}">
+          <div class="lane" v-for="lane in sortedLanes" :key="lane.id">
+            <div class="lane-header">
+              <div class="lane-title"><span class="lane-dot" :style="{background:lane.color}"></span>{{lane.name}}</div>
+              <span class="lane-count">{{getTasksInLane(lane.id).length}}</span>
+            </div>
+            <div class="lane-body" :data-lane-id="lane.id">
+              <div class="task-card" v-for="task in getTasksInLane(lane.id)" :key="task.id" :data-task-id="task.id" :class="['priority-'+task.priority, {'is-overdue':isOverdue(task.deadline)}]" @click="openTaskDetail(task)">
+                <div class="tc-header">
+                  <div class="tc-header-left"><span class="ptag" :class="'p-'+task.priority">{{priorityLabel(task.priority)}}</span><span class="tc-title">{{task.title}}</span><span class="overdue-badge">⏰过期</span></div>
+                  <span class="tc-pts" v-if="task.rewardPoints">💰{{task.rewardPoints}}</span>
+                </div>
+                <div class="tc-desc" v-if="task.description">{{task.description}}</div>
+                <div class="tc-footer">
+                  <span class="tc-deadline" :class="{overdue:isOverdue(task.deadline)}">{{formatDate(task.deadline)}}</span>
+                  <div class="tc-assignees" v-if="task.assigneeUsers?.length"><div class="tc-avatar" v-for="a in task.assigneeUsers" :key="a.id" :title="a.displayName">{{a.displayName?.charAt(0)}}</div></div>
+                </div>
+              </div>
+              <div v-if="getTasksInLane(lane.id).length===0" class="empty-state"><p>暂无任务</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Board: List View -->
+      <div v-if="currentView==='board'&&viewMode==='list'" class="list-view">
+        <table class="list-table">
+          <thead><tr><th>泳道</th><th>优先级</th><th>标题</th><th>描述</th><th>分值</th><th>截止日期</th><th>认领者</th><th>创建者</th><th>创建时间</th></tr></thead>
+          <tbody>
+            <tr v-for="task in allVisibleTasks" :key="task.id" @click="openTaskDetail(task)" style="cursor:pointer">
+              <td><span class="lane-dot" :style="{background:getLaneColor(task.laneId),display:'inline-block',marginRight:'6px'}"></span>{{getLaneName(task.laneId)}}</td>
+              <td><span class="ptag" :class="'p-'+task.priority">{{priorityLabel(task.priority)}}</span></td>
+              <td class="td-title">{{task.title}}</td>
+              <td class="td-desc">{{task.description||'-'}}</td>
+              <td style="color:var(--warning);font-weight:600">{{task.rewardPoints||0}}</td>
+              <td :style="{color:isOverdue(task.deadline)?'var(--danger)':''}">{{formatDate(task.deadline)||'-'}}</td>
+              <td>{{task.assigneeUsers?.map(a=>a.displayName).join(', ')||'-'}}</td>
+              <td>{{task.creatorName}}</td>
+              <td>{{formatDate(task.createdAt)}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Settings -->
+      <div v-if="currentView==='settings'" class="settings-container">
+        <div class="settings-tabs">
+          <div class="settings-tab" :class="{active:settingsTab==='users'}" @click="settingsTab='users'">用户管理</div>
+          <div class="settings-tab" :class="{active:settingsTab==='groups'}" @click="settingsTab='groups'">分组管理</div>
+          <div class="settings-tab" :class="{active:settingsTab==='lanes'}" @click="settingsTab='lanes'">泳道设置</div>
+          <div class="settings-tab" :class="{active:settingsTab==='system'}" @click="settingsTab='system'">功能开关</div>
+        </div>
+        <!-- Users -->
+        <div v-if="settingsTab==='users'">
+          <div class="mgmt-header"><h3>用户列表</h3><button class="btn btn-primary btn-sm" @click="openUserForm()">+ 添加用户</button></div>
+          <table class="data-table">
+            <thead><tr><th>用户名</th><th>显示名</th><th>角色</th><th>分组</th><th>积分</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr v-for="u in users" :key="u.id">
+                <td>{{u.username}}</td><td>{{u.displayName}}</td>
+                <td><span class="badge" :class="u.role==='admin'?'badge-admin':'badge-member'">{{u.role==='admin'?'管理员':'成员'}}</span></td>
+                <td>{{u.group||'-'}}</td><td>{{u.totalPoints}}</td>
+                <td class="actions"><button class="btn btn-secondary btn-sm" @click="openUserForm(u)">编辑</button><button class="btn btn-danger btn-sm" @click="deleteUser(u)" v-if="u.username!=='admin'">删除</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Groups -->
+        <div v-if="settingsTab==='groups'">
+          <div class="mgmt-header"><h3>分组列表</h3><button class="btn btn-primary btn-sm" @click="openGroupForm()">+ 添加分组</button></div>
+          <div v-for="g in groups" :key="g.id" class="lane-list-item"><span>{{g.name}}</span><div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" @click="openGroupForm(g)">编辑</button><button class="btn btn-danger btn-sm" @click="deleteGroup(g)">删除</button></div></div>
+          <div v-if="groups.length===0" class="empty-state"><p>暂无分组</p></div>
+        </div>
+        <!-- Lanes -->
+        <div v-if="settingsTab==='lanes'">
+          <div class="mgmt-header"><h3>泳道列表</h3><button class="btn btn-primary btn-sm" @click="openLaneForm()">+ 添加泳道</button></div>
+          <div v-for="lane in sortedLanes" :key="lane.id" class="lane-list-item">
+            <div class="lane-list-item-left"><span class="lane-dot" :style="{background:lane.color}"></span><span>{{lane.name}}</span></div>
+            <div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" @click="openLaneForm(lane)">编辑</button><button class="btn btn-danger btn-sm" @click="deleteLane(lane)">删除</button></div>
+          </div>
+        </div>
+        <!-- System settings -->
+        <div v-if="settingsTab==='system'">
+          <h3 style="font-size:15px;font-weight:600;margin-bottom:12px">功能开关</h3>
+          <div class="setting-row"><div><label>开放注册</label><div class="desc">允许用户自行注册账号</div></div><div class="toggle" :class="{on:sysSettings.allowRegistration}" @click="toggleSetting('allowRegistration')"></div></div>
+          <div class="setting-row"><div><label>任务可见性控制</label><div class="desc">开启后：待认领任务全员可见，其他泳道仅显示本人任务</div></div><div class="toggle" :class="{on:sysSettings.taskVisibilityControl}" @click="toggleSetting('taskVisibilityControl')"></div></div>
+
+          <h3 style="font-size:15px;font-weight:600;margin:24px 0 12px">系统信息</h3>
+          <div class="setting-input-row"><label>系统名称</label><input v-model="sysSettings.systemName" @change="saveSettings"></div>
+          <div class="setting-input-row"><label>系统图标</label><input v-model="sysSettings.systemIcon" @change="saveSettings" style="max-width:80px"></div>
+
+          <h3 style="font-size:15px;font-weight:600;margin:24px 0 12px">菜单名称与图标</h3>
+          <div class="setting-input-row"><label>看板菜单名</label><input v-model="sysSettings.menuNames.board" @change="saveSettings"></div>
+          <div class="setting-input-row"><label>看板菜单图标</label><input v-model="sysSettings.menuIcons.board" @change="saveSettings" style="max-width:80px"></div>
+          <div class="setting-input-row"><label>设置菜单名</label><input v-model="sysSettings.menuNames.settings" @change="saveSettings"></div>
+          <div class="setting-input-row"><label>设置菜单图标</label><input v-model="sysSettings.menuIcons.settings" @change="saveSettings" style="max-width:80px"></div>
+        </div>
+      </div>
+
+      <button v-if="currentView==='board'&&isAdmin" class="fab" @click="openTaskForm()">+</button>
+    </main>
+  </div>
+
+  <!-- Task Panel -->
+  <div class="panel-overlay" :class="{active:showPanel}" @click="closePanel"></div>
+  <div class="slide-panel" :class="{active:showPanel}">
+    <div class="panel-header"><h3>{{panelMode==='detail'?'任务详情':(editingTask?'编辑任务':'创建任务')}}</h3><button class="panel-close" @click="closePanel">×</button></div>
+    <div class="panel-body">
+      <template v-if="panelMode==='form'">
+        <div class="form-group"><label>标题</label><input class="form-input" v-model="taskForm.title" placeholder="任务标题"></div>
+        <div class="form-group"><label>描述</label><textarea class="form-input" v-model="taskForm.description" placeholder="任务描述"></textarea></div>
+        <div class="form-group"><label>悬赏分值</label><input class="form-input" type="number" v-model.number="taskForm.rewardPoints" min="0"></div>
+        <div class="form-group"><label>期望完成时间</label><input class="form-input" type="date" v-model="taskForm.deadline"></div>
+        <div class="form-group"><label>优先级</label>
+          <select class="form-input" v-model="taskForm.priority"><option value="tian">天（最高）</option><option value="di">地</option><option value="xuan">玄</option><option value="huang">黄（普通）</option></select>
+        </div>
+      </template>
+      <template v-if="panelMode==='detail'&&selectedTask">
+        <div class="form-group"><label>标题</label><div style="font-size:16px;font-weight:500">{{selectedTask.title}}</div></div>
+        <div class="form-group" v-if="selectedTask.description"><label>描述</label><div style="font-size:14px;color:var(--text-secondary);line-height:1.6">{{selectedTask.description}}</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="form-group"><label>悬赏分值</label><div style="font-size:16px;color:var(--warning);font-weight:600">💰 {{selectedTask.rewardPoints}}</div></div>
+          <div class="form-group"><label>优先级</label><div><span class="ptag" :class="'p-'+selectedTask.priority" style="font-size:12px;padding:3px 10px">{{priorityLabel(selectedTask.priority)}}</span></div></div>
+          <div class="form-group"><label>截止日期</label><div style="font-size:14px">{{formatDate(selectedTask.deadline)||'未设置'}}</div></div>
+          <div class="form-group"><label>创建者</label><div style="font-size:14px">{{selectedTask.creatorName}}</div></div>
+        </div>
+        <div class="form-group"><label>认领者</label>
+          <div v-if="selectedTask.assigneeUsers?.length" style="display:flex;gap:8px;flex-wrap:wrap"><span v-for="a in selectedTask.assigneeUsers" :key="a.id" class="badge badge-member">{{a.displayName}}</span></div>
+          <div v-else style="font-size:13px;color:var(--text-tertiary)">暂无人认领</div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+          <button v-if="!isClaimed(selectedTask)" class="btn btn-primary btn-sm" @click="claimTask(selectedTask)">认领任务</button>
+          <button v-if="isClaimed(selectedTask)" class="btn btn-secondary btn-sm" @click="unclaimTask(selectedTask)">取消认领</button>
+          <button v-if="isAdmin" class="btn btn-secondary btn-sm" @click="openTaskForm(selectedTask)">编辑</button>
+          <button v-if="isAdmin" class="btn btn-danger btn-sm" @click="deleteTask(selectedTask)">删除</button>
+        </div>
+        <div class="comments-section">
+          <h4>💬 评论 ({{comments.length}})</h4>
+          <div v-for="c in comments" :key="c.id" class="comment-item"><div class="comment-header"><span>{{c.userName}}</span><span>{{formatDateTime(c.createdAt)}}</span></div><div class="comment-content">{{c.content}}</div></div>
+          <div class="comment-input"><input v-model="newComment" @keyup.enter="addComment" placeholder="写评论..."><button class="btn btn-primary btn-sm" @click="addComment">发送</button></div>
+        </div>
+      </template>
+    </div>
+    <div v-if="panelMode==='form'" class="panel-footer"><button class="btn btn-secondary" @click="closePanel">取消</button><button class="btn btn-primary" @click="saveTask">{{editingTask?'保存':'创建'}}</button></div>
+  </div>
+
+  <!-- Modals -->
+  <div v-if="showUserModal" class="modal-overlay" @click.self="showUserModal=false"><div class="modal">
+    <h3>{{editingUser?'编辑用户':'添加用户'}}</h3>
+    <div class="form-group"><label>用户名</label><input class="form-input" v-model="userForm.username" :disabled="!!editingUser" placeholder="登录用户名"></div>
+    <div class="form-group"><label>{{editingUser?'新密码（留空不修改）':'密码'}}</label><input class="form-input" type="password" v-model="userForm.password" placeholder="密码"></div>
+    <div class="form-group"><label>显示名称</label><input class="form-input" v-model="userForm.displayName" placeholder="显示名称"></div>
+    <div class="form-group"><label>角色</label><select class="form-input" v-model="userForm.role"><option value="member">普通成员</option><option value="admin">管理员</option></select></div>
+    <div class="form-group"><label>分组</label><select class="form-input" v-model="userForm.group"><option value="">无分组</option><option v-for="g in groups" :key="g.id" :value="g.name">{{g.name}}</option></select></div>
+    <div style="display:flex;gap:12px;justify-content:flex-end"><button class="btn btn-secondary" @click="showUserModal=false">取消</button><button class="btn btn-primary" @click="saveUser">保存</button></div>
+  </div></div>
+  <div v-if="showGroupModal" class="modal-overlay" @click.self="showGroupModal=false"><div class="modal">
+    <h3>{{editingGroup?'编辑分组':'添加分组'}}</h3>
+    <div class="form-group"><label>分组名称</label><input class="form-input" v-model="groupForm.name" placeholder="分组名称"></div>
+    <div style="display:flex;gap:12px;justify-content:flex-end"><button class="btn btn-secondary" @click="showGroupModal=false">取消</button><button class="btn btn-primary" @click="saveGroup">保存</button></div>
+  </div></div>
+  <div v-if="showLaneModal" class="modal-overlay" @click.self="showLaneModal=false"><div class="modal">
+    <h3>{{editingLane?'编辑泳道':'添加泳道'}}</h3>
+    <div class="form-group"><label>泳道名称</label><input class="form-input" v-model="laneForm.name" placeholder="泳道名称"></div>
+    <div class="form-group"><label>标识颜色</label><input class="form-input" type="color" v-model="laneForm.color" style="height:40px;padding:4px"></div>
+    <div style="display:flex;gap:12px;justify-content:flex-end"><button class="btn btn-secondary" @click="showLaneModal=false">取消</button><button class="btn btn-primary" @click="saveLane">保存</button></div>
+  </div></div>
+</div>
+
+<script>
+const{createApp,ref,computed,onMounted,nextTick,watch}=Vue;
+createApp({
+  setup(){
+    const token=ref(localStorage.getItem('token')||'');
+    const currentUser=ref({});
+    const isLoggedIn=ref(false);
+    const currentView=ref('board');
+    const settingsTab=ref('users');
+    const isDark=ref(localStorage.getItem('theme')==='dark');
+    const searchQuery=ref('');
+    const filterPriority=ref('');
+    const filterAssignee=ref('');
+    const filterCreator=ref('');
+    const selectedGroups=ref([]);
+    const viewMode=ref(localStorage.getItem('viewMode')||'card');
+    const orientation=ref(localStorage.getItem('orientation')||'h');
+    const authMode=ref('login');
+    const tasks=ref([]);
+    const lanes=ref([]);
+    const users=ref([]);
+    const groups=ref([]);
+    const leaderboard=ref([]);
+    const comments=ref([]);
+    const sysSettings=ref({allowRegistration:true,taskVisibilityControl:false,systemName:'任务看板',systemIcon:'📋',menuNames:{board:'看板',settings:'系统设置'},menuIcons:{board:'📋',settings:'⚙️'}});
+    const loginForm=ref({username:'',password:''});
+    const registerForm=ref({username:'',password:'',displayName:''});
+    const loginError=ref('');
+    const showChangePassword=ref(false);
+    const passwordForm=ref({oldPassword:'',newPassword:'',confirmPassword:''});
+    const showPanel=ref(false);
+    const panelMode=ref('form');
+    const selectedTask=ref(null);
+    const editingTask=ref(null);
+    const taskForm=ref({title:'',description:'',rewardPoints:0,deadline:'',priority:'xuan'});
+    const newComment=ref('');
+    const showUserModal=ref(false);
+    const editingUser=ref(null);
+    const userForm=ref({username:'',password:'',displayName:'',role:'member',group:''});
+    const showGroupModal=ref(false);
+    const editingGroup=ref(null);
+    const groupForm=ref({name:''});
+    const showLaneModal=ref(false);
+    const editingLane=ref(null);
+    const laneForm=ref({name:'',color:'#007AFF'});
+    const toast=ref({show:false,message:''});
+
+    const isAdmin=computed(()=>currentUser.value.role==='admin');
+    const sortedLanes=computed(()=>[...lanes.value].sort((a,b)=>a.order-b.order));
+    const PRIORITY_LABELS={tian:'天',di:'地',xuan:'玄',huang:'黄'};
+    function priorityLabel(p){return PRIORITY_LABELS[p]||p}
+
+    const allUsers=computed(()=>{
+      const seen=new Set();
+      const result=[];
+      tasks.value.forEach(t=>{
+        if(t.assigneeUsers)t.assigneeUsers.forEach(u=>{if(!seen.has(u.id)){seen.add(u.id);result.push(u)}});
+        if(t.creatorUser&&!seen.has(t.creatorUser.id)){seen.add(t.creatorUser.id);result.push(t.creatorUser)}
+      });
+      return result;
+    });
+
+    function applyFilters(list){
+      if(searchQuery.value){const q=searchQuery.value.toLowerCase();list=list.filter(t=>t.title.toLowerCase().includes(q)||t.description?.toLowerCase().includes(q))}
+      if(filterPriority.value){list=list.filter(t=>t.priority===filterPriority.value)}
+      if(filterAssignee.value){list=list.filter(t=>t.assignees?.includes(filterAssignee.value))}
+      if(filterCreator.value){list=list.filter(t=>t.createdBy===filterCreator.value)}
+      if(selectedGroups.value.length>0){list=list.filter(t=>{if(!t.assigneeUsers?.length)return true;return t.assigneeUsers.some(a=>selectedGroups.value.includes(a.group))})}
+      return list;
+    }
+
+    const allVisibleTasks=computed(()=>{
+      let list=applyFilters(tasks.value);
+      list=applyVisibility(list);
+      return list.sort((a,b)=>{const la=lanes.value.find(l=>l.id===a.laneId);const lb=lanes.value.find(l=>l.id===b.laneId);return(la?.order||0)-(lb?.order||0)});
+    });
+
+    function applyVisibility(taskList){
+      if(!sysSettings.value.taskVisibilityControl)return taskList;
+      if(isAdmin.value)return taskList;
+      const firstLane=sortedLanes.value[0];
+      return taskList.filter(t=>{if(firstLane&&t.laneId===firstLane.id)return true;return t.assignees?.includes(currentUser.value.id)});
+    }
+
+    async function api(url,options={}){
+      const headers={'Content-Type':'application/json'};
+      if(token.value)headers['Authorization']=`Bearer ${token.value}`;
+      const res=await fetch(url,{...options,headers});
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error||'请求失败');
+      return data;
+    }
+    function showToast(msg){toast.value={show:true,message:msg};setTimeout(()=>{toast.value.show=false},3000)}
+    function toggleTheme(){isDark.value=!isDark.value;document.documentElement.setAttribute('data-theme',isDark.value?'dark':'light');localStorage.setItem('theme',isDark.value?'dark':'light')}
+    function setViewMode(m){viewMode.value=m;localStorage.setItem('viewMode',m);if(m==='card')nextTick(initSortable)}
+    function toggleOrientation(){orientation.value=orientation.value==='h'?'v':'h';localStorage.setItem('orientation',orientation.value);nextTick(initSortable)}
+
+    async function login(){
+      loginError.value='';
+      try{const data=await api('/api/auth/login',{method:'POST',body:JSON.stringify(loginForm.value)});token.value=data.token;localStorage.setItem('token',data.token);currentUser.value=data.user;isLoggedIn.value=true;if(data.user.mustChangePassword)showChangePassword.value=true;await loadData();nextTick(initSortable)}
+      catch(e){loginError.value=e.message}
+    }
+    async function register(){
+      loginError.value='';
+      try{const data=await api('/api/auth/register',{method:'POST',body:JSON.stringify(registerForm.value)});token.value=data.token;localStorage.setItem('token',data.token);currentUser.value=data.user;isLoggedIn.value=true;await loadData();nextTick(initSortable);showToast('注册成功')}
+      catch(e){loginError.value=e.message}
+    }
+    async function checkAuth(){
+      if(!token.value)return;
+      try{currentUser.value=await api('/api/auth/me');isLoggedIn.value=true;if(currentUser.value.mustChangePassword)showChangePassword.value=true;await loadData();nextTick(initSortable)}
+      catch(e){token.value='';localStorage.removeItem('token')}
+    }
+    function logout(){token.value='';localStorage.removeItem('token');isLoggedIn.value=false;currentUser.value={}}
+    async function changePassword(){
+      if(passwordForm.value.newPassword!==passwordForm.value.confirmPassword){showToast('两次输入的密码不一致');return}
+      try{await api('/api/auth/password',{method:'PUT',body:JSON.stringify({oldPassword:passwordForm.value.oldPassword,newPassword:passwordForm.value.newPassword})});showChangePassword.value=false;showToast('密码修改成功')}
+      catch(e){showToast(e.message)}
+    }
+    async function loadData(){
+      try{
+        const[t,l,g,s]=await Promise.all([api('/api/tasks'),api('/api/lanes'),api('/api/groups'),api('/api/settings')]);
+        tasks.value=t;lanes.value=l;groups.value=g;sysSettings.value={systemName:'任务看板',systemIcon:'📋',menuNames:{board:'看板',settings:'系统设置'},menuIcons:{board:'📋',settings:'⚙️'},...s};
+        if(isAdmin.value){users.value=await api('/api/users')}
+        leaderboard.value=await api('/api/leaderboard');
+      }catch(e){showToast('数据加载失败')}
+    }
+
+    function getTasksInLane(laneId){
+      let filtered=tasks.value.filter(t=>t.laneId===laneId);
+      filtered=applyFilters(filtered);
+      filtered=applyVisibility(filtered);
+      return filtered;
+    }
+    function getLaneName(id){return lanes.value.find(l=>l.id===id)?.name||''}
+    function getLaneColor(id){return lanes.value.find(l=>l.id===id)?.color||'#999'}
+
+    function openTaskForm(task=null){
+      editingTask.value=task;panelMode.value='form';
+      if(task){taskForm.value={title:task.title,description:task.description,rewardPoints:task.rewardPoints,deadline:task.deadline?.split('T')[0]||'',priority:task.priority}}
+      else{taskForm.value={title:'',description:'',rewardPoints:0,deadline:'',priority:'xuan'}}
+      showPanel.value=true;
+    }
+    async function saveTask(){
+      try{
+        if(editingTask.value){await api(`/api/tasks/${editingTask.value.id}`,{method:'PUT',body:JSON.stringify(taskForm.value)});showToast('任务已更新')}
+        else{await api('/api/tasks',{method:'POST',body:JSON.stringify(taskForm.value)});showToast('任务已创建')}
+        closePanel();await loadData();nextTick(initSortable);
+      }catch(e){showToast(e.message)}
+    }
+    async function deleteTask(task){if(!confirm('确定删除此任务？'))return;try{await api(`/api/tasks/${task.id}`,{method:'DELETE'});closePanel();await loadData();nextTick(initSortable);showToast('任务已删除')}catch(e){showToast(e.message)}}
+    async function openTaskDetail(task){selectedTask.value=task;panelMode.value='detail';showPanel.value=true;try{comments.value=await api(`/api/tasks/${task.id}/comments`)}catch(e){comments.value=[]}}
+    function closePanel(){showPanel.value=false;selectedTask.value=null;editingTask.value=null}
+    function isClaimed(task){return task?.assignees?.includes(currentUser.value.id)}
+    async function claimTask(task){try{await api(`/api/tasks/${task.id}/claim`,{method:'POST'});await loadData();selectedTask.value=tasks.value.find(t=>t.id===task.id);showToast('认领成功')}catch(e){showToast(e.message)}}
+    async function unclaimTask(task){try{await api(`/api/tasks/${task.id}/unclaim`,{method:'POST'});await loadData();selectedTask.value=tasks.value.find(t=>t.id===task.id);showToast('已取消认领')}catch(e){showToast(e.message)}}
+    async function addComment(){if(!newComment.value.trim()||!selectedTask.value)return;try{const c=await api(`/api/tasks/${selectedTask.value.id}/comments`,{method:'POST',body:JSON.stringify({content:newComment.value.trim()})});comments.value.push(c);newComment.value=''}catch(e){showToast(e.message)}}
+
+    function openUserForm(user=null){editingUser.value=user;if(user){userForm.value={username:user.username,password:'',displayName:user.displayName,role:user.role,group:user.group||''}}else{userForm.value={username:'',password:'',displayName:'',role:'member',group:''}};showUserModal.value=true}
+    async function saveUser(){try{const body={...userForm.value};if(editingUser.value){if(!body.password)delete body.password;await api(`/api/users/${editingUser.value.id}`,{method:'PUT',body:JSON.stringify(body)});showToast('用户已更新')}else{await api('/api/users',{method:'POST',body:JSON.stringify(body)});showToast('用户已创建')};showUserModal.value=false;await loadData()}catch(e){showToast(e.message)}}
+    async function deleteUser(user){if(!confirm(`确定删除用户 ${user.displayName}？`))return;try{await api(`/api/users/${user.id}`,{method:'DELETE'});await loadData();showToast('用户已删除')}catch(e){showToast(e.message)}}
+    function openGroupForm(group=null){editingGroup.value=group;groupForm.value={name:group?.name||''};showGroupModal.value=true}
+    async function saveGroup(){try{if(editingGroup.value){await api(`/api/groups/${editingGroup.value.id}`,{method:'PUT',body:JSON.stringify(groupForm.value)});showToast('分组已更新')}else{await api('/api/groups',{method:'POST',body:JSON.stringify(groupForm.value)});showToast('分组已创建')};showGroupModal.value=false;await loadData()}catch(e){showToast(e.message)}}
+    async function deleteGroup(group){if(!confirm(`确定删除分组 ${group.name}？`))return;try{await api(`/api/groups/${group.id}`,{method:'DELETE'});await loadData();showToast('分组已删除')}catch(e){showToast(e.message)}}
+    function openLaneForm(lane=null){editingLane.value=lane;laneForm.value={name:lane?.name||'',color:lane?.color||'#007AFF'};showLaneModal.value=true}
+    async function saveLane(){try{if(editingLane.value){await api(`/api/lanes/${editingLane.value.id}`,{method:'PUT',body:JSON.stringify(laneForm.value)});showToast('泳道已更新')}else{await api('/api/lanes',{method:'POST',body:JSON.stringify(laneForm.value)});showToast('泳道已创建')};showLaneModal.value=false;await loadData();nextTick(initSortable)}catch(e){showToast(e.message)}}
+    async function deleteLane(lane){if(!confirm(`确定删除泳道 ${lane.name}？`))return;try{await api(`/api/lanes/${lane.id}`,{method:'DELETE'});await loadData();nextTick(initSortable);showToast('泳道已删除')}catch(e){showToast(e.message)}}
+
+    async function toggleSetting(key){
+      sysSettings.value[key]=!sysSettings.value[key];
+      try{await api('/api/settings',{method:'PUT',body:JSON.stringify(sysSettings.value)});showToast('设置已更新')}
+      catch(e){sysSettings.value[key]=!sysSettings.value[key];showToast(e.message)}
+    }
+    async function saveSettings(){
+      try{await api('/api/settings',{method:'PUT',body:JSON.stringify(sysSettings.value)});showToast('设置已保存')}
+      catch(e){showToast(e.message)}
+    }
+
+    let sortableInstances=[];
+    function initSortable(){
+      sortableInstances.forEach(s=>s.destroy());sortableInstances=[];
+      document.querySelectorAll('.lane-body').forEach(el=>{
+        const s=Sortable.create(el,{group:'tasks',animation:200,ghostClass:'sortable-ghost',draggable:'.task-card',
+          onEnd:async(evt)=>{const taskId=evt.item.dataset.taskId;const newLaneId=evt.to.dataset.laneId;if(!taskId||!newLaneId)return;try{await api(`/api/tasks/${taskId}/move`,{method:'PUT',body:JSON.stringify({laneId:newLaneId})});await loadData();nextTick(initSortable)}catch(e){showToast(e.message);await loadData();nextTick(initSortable)}}
+        });
+        sortableInstances.push(s);
+      });
+    }
+
+    function formatDate(s){if(!s)return'';const d=new Date(s);return`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`}
+    function formatDateTime(s){if(!s)return'';const d=new Date(s);return`${formatDate(s)} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`}
+    function isOverdue(s){if(!s)return false;return new Date(s)<new Date()}
+
+    onMounted(async()=>{document.documentElement.setAttribute('data-theme',isDark.value?'dark':'light');try{const s=await(await fetch('/api/settings')).json();sysSettings.value={systemName:'任务看板',systemIcon:'📋',menuNames:{board:'看板',settings:'系统设置'},menuIcons:{board:'📋',settings:'⚙️'},...s}}catch(e){};checkAuth()});
+    watch(currentView,v=>{if(v==='board'&&viewMode.value==='card')nextTick(initSortable)});
+
+    return{
+      token,currentUser,isLoggedIn,isAdmin,currentView,settingsTab,isDark,searchQuery,filterPriority,filterAssignee,filterCreator,selectedGroups,viewMode,orientation,authMode,
+      tasks,lanes,users,groups,leaderboard,comments,sortedLanes,sysSettings,allVisibleTasks,allUsers,
+      loginForm,registerForm,loginError,showChangePassword,passwordForm,
+      showPanel,panelMode,selectedTask,editingTask,taskForm,newComment,
+      showUserModal,editingUser,userForm,showGroupModal,editingGroup,groupForm,showLaneModal,editingLane,laneForm,toast,
+      toggleTheme,setViewMode,toggleOrientation,login,register,logout,changePassword,
+      getTasksInLane,getLaneName,getLaneColor,openTaskForm,saveTask,deleteTask,openTaskDetail,closePanel,priorityLabel,
+      isClaimed,claimTask,unclaimTask,addComment,openUserForm,saveUser,deleteUser,
+      openGroupForm,saveGroup,deleteGroup,openLaneForm,saveLane,deleteLane,
+      toggleSetting,saveSettings,formatDate,formatDateTime,isOverdue
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
